@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String @db.VarChar(100)
+  email    String @unique @db.VarChar(150)
+  password String @db.VarChar(255)
+
+  teamMembers TeamMember[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Team {
+  id          String @id @default(uuid())
+  name        String @db.VarChar(100)
+  description String
+
+  tasks       Task[]
+  teamMembers TeamMember[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("teams")
+}
+
+enum TeamMemberRole {
+  owner
+  admin
+  member
+}
+
+model TeamMember {
+  id       String         @id @default(uuid())
+  role     TeamMemberRole @default(member)
+  isActive Boolean        @default(true) @map("is_active")
+
+  userId String @map("user_id") @db.Uuid
+  teamId String @map("team_id") @db.Uuid
+
+  user User @relation(fields: [userId], references: [id])
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  tasks    Task[]
+  taskLogs TaskLog[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([teamId, userId], map: "team_member", name: "teamMember")
+  @@map("team_members")
+}
+
+enum TaskStatus {
+  pending
+  inProgress
+  completed
+}
+
+enum TaskPriority {
+  high
+  medium
+  low
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  title       String       @db.VarChar(200)
+  description String
+  status      TaskStatus
+  priority    TaskPriority
+
+  assignTo String @map("assign_to") @db.Uuid
+  teamId   String @map("team_id") @db.Uuid
+
+  team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamMember TeamMember @relation(fields: [assignTo], references: [id])
+
+  logs TaskLog[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("tasks")
+}
+
+model TaskLog {
+  id        String @id @default(uuid())
+  taskId    String @map("task_id") @db.Uuid
+  changedBy String @map("changed_by") @db.Uuid
+
+  oldStatus TaskStatus?
+  newStatus TaskStatus
+
+  task       Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  teamMember TeamMember @relation(fields: [changedBy], references: [id])
+
+  changedAt DateTime @default(now()) @map("changed_at")
+
+  @@map("task_logs")
+}
