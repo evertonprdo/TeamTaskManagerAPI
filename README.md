@@ -6,11 +6,15 @@ This repository is the resolution of the [RocketSeat](https://www.rocketseat.com
 
 ## Execution flow, features and entities
 
-![user & team members](./screenshots/user&team-member.png)
-
-![task & team](./screenshots/task&team.png)
-
 ![entities](./screenshots/entities.png)
+
+![user](./screenshots/user.png)
+
+![team](./screenshots/team.png)
+
+![team member & task](./screenshots/team-member&task.png)
+
+![notification](./screenshots/notification.png)
 
 ## Database
 

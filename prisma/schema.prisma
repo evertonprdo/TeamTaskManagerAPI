@@ -13,7 +13,8 @@ model User {
   email    String @unique @db.VarChar(150)
   password String @db.VarChar(255)
 
-  teamMembers TeamMember[]
+  teamMembers       TeamMember[]
+  userNotifications UserNotification[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -35,16 +36,22 @@ model Team {
   @@map("teams")
 }
 
+enum TeamMemberStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
+}
+
 enum TeamMemberRole {
-  owner
-  admin
-  member
+  OWNER
+  ADMIN
+  MEMBER
 }
 
 model TeamMember {
-  id       String         @id @default(uuid())
-  role     TeamMemberRole @default(member)
-  isActive Boolean        @default(true) @map("is_active")
+  id     String           @id @default(uuid())
+  role   TeamMemberRole   @default(MEMBER)
+  status TeamMemberStatus @default(INVITED)
 
   userId String @map("user_id") @db.Uuid
   teamId String @map("team_id") @db.Uuid
@@ -62,15 +69,15 @@ model TeamMember {
 }
 
 enum TaskStatus {
-  pending
-  inProgress
-  completed
+  PENDING
+  IN_PROGRESS
+  COMPLETED
 }
 
 enum TaskPriority {
-  high
-  medium
-  low
+  HIGH
+  MEDIUM
+  LOW
 }
 
 model Task {
@@ -80,11 +87,11 @@ model Task {
   status      TaskStatus
   priority    TaskPriority
 
-  assignTo String @map("assign_to") @db.Uuid
-  teamId   String @map("team_id") @db.Uuid
+  assignedTo String @map("assigned_to") @db.Uuid
+  teamId     String @map("team_id") @db.Uuid
 
   team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamMember TeamMember @relation(fields: [assignTo], references: [id])
+  teamMember TeamMember @relation(fields: [assignedTo], references: [id])
 
   logs TaskLog[]
 
@@ -108,4 +115,28 @@ model TaskLog {
   changedAt DateTime @default(now()) @map("changed_at")
 
   @@map("task_logs")
+}
+
+model Notification {
+  id      String @id @default(uuid())
+  title   String @db.VarChar(255)
+  content String
+
+  userNotifications UserNotification[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("notifications")
+}
+
+model UserNotification {
+  id             String    @id @default(uuid())
+  receiverId     String    @map("receiver_id") @db.Uuid
+  notificationId String    @map("notification_id") @db.Uuid
+  readAt         DateTime? @map("read_at")
+
+  user         User         @relation(fields: [receiverId], references: [id])
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@map("user_notifications")
 }
