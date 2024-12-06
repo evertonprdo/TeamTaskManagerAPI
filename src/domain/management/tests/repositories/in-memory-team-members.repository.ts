@@ -72,4 +72,16 @@ export class InMemoryTeamMembersRepository
    async create(teamMember: TeamMember): Promise<void> {
       this.items.push(teamMember)
    }
+
+   async save(teamMember: TeamMember): Promise<void> {
+      const memberIndex = this.items.findIndex((item) =>
+         item.id.equals(teamMember.id),
+      )
+
+      if (memberIndex < 0) {
+         throw new Error()
+      }
+
+      this.items[memberIndex] = teamMember
+   }
 }

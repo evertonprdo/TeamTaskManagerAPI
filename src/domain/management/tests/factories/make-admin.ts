@@ -13,7 +13,7 @@ export function makeAdmin(
          userId: new UniqueEntityID(),
          ...overwrite,
       },
-      id,
+      id ?? new UniqueEntityID(),
    )
 
    return admin

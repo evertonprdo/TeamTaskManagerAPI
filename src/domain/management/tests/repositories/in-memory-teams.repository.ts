@@ -23,23 +23,10 @@ export class InMemoryTeamsRepository implements TeamsRepository {
       const teamMembers =
          await this.teamMembersRepository.findManyWithNameByTeamId(id)
 
-      const ownerIndex = teamMembers.findIndex(
-         (member) => member.role === 'OWNER',
-      )
-
-      if (ownerIndex < 0) {
-         throw new Error()
-      }
-
-      const owner = teamMembers[ownerIndex]
-      teamMembers.splice(ownerIndex, 1)
-
       return TeamDetails.create({
          id: team.id,
          teamName: team.name,
          description: team.description,
-         ownerId: owner.id,
-         ownerName: owner.name,
          teamMembers,
          tasks: [],
       })

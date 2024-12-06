@@ -9,9 +9,6 @@ export interface TeamDetailsProps {
    teamName: string
    description: string
 
-   ownerName: string
-   ownerId: UniqueEntityID
-
    teamMembers: TeamMemberWithName[]
    tasks: Task[]
 }
@@ -27,14 +24,6 @@ export class TeamDetails extends ValueObject<TeamDetailsProps> {
 
    get description() {
       return this.props.description
-   }
-
-   get ownerName() {
-      return this.props.ownerName
-   }
-
-   get ownerId() {
-      return this.props.ownerId
    }
 
    get teamMembers() {

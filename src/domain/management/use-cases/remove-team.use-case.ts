@@ -4,6 +4,7 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 
 import { TeamsRepository } from '../repositories/teams.repository'
+import { Owner } from '../entities/owner'
 
 interface RemoveTeamUseCaseRequest {
    teamId: string
@@ -26,11 +27,16 @@ export class RemoveTeamUseCase {
       const userIds: UniqueEntityID[] = []
 
       for (const member of team.members) {
+         if (member instanceof Owner) {
+            continue
+         }
+
          if (member.status === 'ACTIVE') {
             userIds.push(member.userId)
          }
       }
 
+      team.setupToRemove(userIds)
       await this.teamsRepository.delete(team)
 
       return right(null)

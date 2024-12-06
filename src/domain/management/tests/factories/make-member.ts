@@ -13,7 +13,7 @@ export function makeMember(
          userId: new UniqueEntityID(),
          ...overwrite,
       },
-      id,
+      id ?? new UniqueEntityID(),
    )
 
    return member

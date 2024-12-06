@@ -7,4 +7,7 @@ export interface TeamMembersRepository {
 
    findById(id: string): Promise<null | TeamMember>
    findWithNameById(id: string): Promise<null | TeamMemberWithName>
+
+   create(teamMember: TeamMember): Promise<void>
+   save(teamMember: TeamMember): Promise<void>
 }

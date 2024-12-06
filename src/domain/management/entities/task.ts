@@ -4,6 +4,9 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
 import { TaskReassignedEvent } from '../events/task-reassigned.event'
 import { TaskAction, TaskEvent } from '../events/task.event'
+import { TaskStatusUpdatedEvent } from '../events/task-status-updated.event'
+
+import { TeamMember } from './team-member'
 
 export type TaskPriority = 'HIGH' | 'MEDIUM' | 'LOW'
 export type TaskStatus = 'UNASSIGN' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'
@@ -73,14 +76,26 @@ export class Task extends AggregateRoot<TaskProps> {
       this.props.updatedAt = new Date()
    }
 
-   start() {
+   start(changedBy: TeamMember) {
+      const oldStatus = this.status
+
       this.props.status = 'IN_PROGRESS'
       this.touch()
+
+      this.addDomainEvent(
+         new TaskStatusUpdatedEvent(this, oldStatus, changedBy),
+      )
    }
 
-   complete() {
+   complete(changedBy: TeamMember) {
+      const oldStatus = this.status
+
       this.props.status = 'COMPLETED'
       this.touch()
+
+      this.addDomainEvent(
+         new TaskStatusUpdatedEvent(this, oldStatus, changedBy),
+      )
    }
 
    assign(teamMemberId: UniqueEntityID) {

@@ -36,4 +36,6 @@ export abstract class TeamMember<
    protected touch() {
       this.props.updatedAt = new Date()
    }
+
+   abstract remove(removingBy: TeamMember): void
 }

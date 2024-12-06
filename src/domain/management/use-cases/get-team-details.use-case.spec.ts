@@ -56,12 +56,11 @@ describe('Use case: Get team details', () => {
          id: team.id,
          teamName: team.name,
          description: team.description,
-         ownerName: userOwner.name,
-         ownerId: owner.id,
       })
 
-      expect(result.value.teamDetails.teamMembers).toHaveLength(3)
+      expect(result.value.teamDetails.teamMembers).toHaveLength(4)
       expect(result.value.teamDetails.teamMembers).toMatchObject([
+         expect.objectContaining({ id: owner.id, role: 'OWNER' }),
          expect.objectContaining({ id: members[0].id, userId: users[0].id }),
          expect.objectContaining({ id: members[1].id, userId: users[1].id }),
          expect.objectContaining({ id: members[2].id, userId: users[2].id }),
