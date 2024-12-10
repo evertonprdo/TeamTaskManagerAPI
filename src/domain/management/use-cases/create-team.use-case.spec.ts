@@ -1,14 +1,14 @@
-import { makeUser } from '../tests/factories/make-user'
-
 import { InMemoryTeamsRepository } from '../tests/repositories/in-memory-teams.repository'
 import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
 import { Owner } from '../entities/owner'
 import { CreateTeamUseCase } from './create-team.use-case'
+import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
 
+let tasksRepository: InMemoryTasksRepository
 let teamMembersRepository: InMemoryTeamMembersRepository
 let usersRepository: InMemoryUsersRepository
 let teamsRepository: InMemoryTeamsRepository
@@ -17,23 +17,25 @@ let sut: CreateTeamUseCase
 
 describe('Use case: Create team', () => {
    beforeEach(() => {
+      tasksRepository = new InMemoryTasksRepository()
       usersRepository = new InMemoryUsersRepository()
-      teamMembersRepository = new InMemoryTeamMembersRepository(usersRepository)
-      teamsRepository = new InMemoryTeamsRepository(teamMembersRepository)
 
-      sut = new CreateTeamUseCase(
+      teamMembersRepository = new InMemoryTeamMembersRepository(
          usersRepository,
-         teamsRepository,
-         teamMembersRepository,
+         tasksRepository,
       )
+
+      teamsRepository = new InMemoryTeamsRepository(
+         teamMembersRepository,
+         tasksRepository,
+      )
+
+      sut = new CreateTeamUseCase(teamsRepository, teamMembersRepository)
    })
 
    it('should create a team and a owner', async () => {
-      const user = makeUser()
-      usersRepository.items.push(user)
-
       const result = await sut.execute({
-         userId: user.id.toString(),
+         userId: new UniqueEntityID().toString(),
          name: 'New Team',
          description: 'New team test',
       })
@@ -49,16 +51,8 @@ describe('Use case: Create team', () => {
          description: 'New team test',
       })
       expect(result.value.owner).toBeInstanceOf(Owner)
-   })
 
-   it('should not create a team if a user does not exist', async () => {
-      const result = await sut.execute({
-         userId: 'any-user',
-         name: 'New Team',
-         description: 'New team test',
-      })
-
-      expect(result.isLeft()).toBe(true)
-      expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(result.value.owner).toEqual(teamMembersRepository.items[0])
+      expect(result.value.team).toEqual(teamsRepository.items[0])
    })
 })

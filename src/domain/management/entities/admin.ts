@@ -6,8 +6,8 @@ import { TeamMember, TeamMemberProps } from './team-member'
 
 import { TeamMemberCreatedEvent } from '../events/team-member-created.event'
 import { TeamMemberRemovedEvent } from '../events/team-member-removed.event'
-import { TeamMemberAcceptedInvitationEvent } from '../events/team-member-accepted-invitation.event'
 import { TeamMemberRoleUpdatedEvent } from '../events/team-member-role-updated.event'
+import { TeamMemberAcceptedInvitationEvent } from '../events/team-member-accepted-invitation.event'
 
 export interface CreateAdminProps {
    props: Optional<TeamMemberProps, 'createdAt' | 'status'>
@@ -16,6 +16,12 @@ export interface CreateAdminProps {
 }
 
 export class Admin extends TeamMember {
+   private __admin = 'admin'
+
+   reinviteInactive(invitedBy: Owner) {
+      this.addDomainEvent(new TeamMemberCreatedEvent(this, invitedBy))
+   }
+
    acceptInvite() {
       this.props.status = 'ACTIVE'
       this.touch()
@@ -30,36 +36,26 @@ export class Admin extends TeamMember {
       this.addDomainEvent(new TeamMemberRemovedEvent(this, removedBy))
    }
 
-   setupRoleUpdated(changedBy: Owner) {
+   setupUpdateRole() {
       this.touch()
-      this.addDomainEvent(
-         new TeamMemberRoleUpdatedEvent(this, changedBy, 'MEMBER'),
-      )
+      this.addDomainEvent(new TeamMemberRoleUpdatedEvent(this, 'MEMBER'))
    }
 
-   static create(
-      props: Optional<TeamMemberProps, 'createdAt' | 'status'>,
-      id: UniqueEntityID,
-   ): Admin
+   static create(props: TeamMemberProps, id: UniqueEntityID): Admin
 
    static create(
       props: Omit<TeamMemberProps, 'createdAt' | 'status' | 'updatedAt'>,
-      createBy: Admin | Owner,
+      createBy: Owner,
    ): Admin
 
    static create(
-      props: Optional<TeamMemberProps, 'createdAt' | 'status'>,
-      secondProp: UniqueEntityID | Admin | Owner,
+      props:
+         | Optional<TeamMemberProps, 'createdAt' | 'status'>
+         | TeamMemberProps,
+      secondProp: UniqueEntityID | Owner,
    ) {
       if (secondProp instanceof UniqueEntityID) {
-         return new Admin(
-            {
-               ...props,
-               createdAt: props.createdAt ?? new Date(),
-               status: props.status ?? 'INVITED',
-            },
-            secondProp,
-         )
+         return new Admin(props as TeamMemberProps, secondProp)
       }
 
       const member = new Admin({

@@ -7,6 +7,8 @@ import { TaskAction, TaskEvent } from '../events/task.event'
 import { TaskStatusUpdatedEvent } from '../events/task-status-updated.event'
 
 import { TeamMember } from './team-member'
+import { Admin } from './admin'
+import { Owner } from './owner'
 
 export type TaskPriority = 'HIGH' | 'MEDIUM' | 'LOW'
 export type TaskStatus = 'UNASSIGN' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'
@@ -17,7 +19,7 @@ export interface TaskProps {
    status: TaskStatus
    priority: TaskPriority
 
-   assignedTo?: UniqueEntityID | null
+   assignedToId?: UniqueEntityID | null
    teamId: UniqueEntityID
 
    createdAt: Date
@@ -56,8 +58,8 @@ export class Task extends AggregateRoot<TaskProps> {
       this.touch()
    }
 
-   get assignedTo() {
-      return this.props.assignedTo
+   get assignedToId() {
+      return this.props.assignedToId
    }
 
    get teamId() {
@@ -99,53 +101,52 @@ export class Task extends AggregateRoot<TaskProps> {
    }
 
    assign(teamMemberId: UniqueEntityID) {
-      if (this.props.assignedTo) {
-         throw new Error()
-      }
-
       this.props.status = 'PENDING'
-      this.props.assignedTo = teamMemberId
+      this.props.assignedToId = teamMemberId
       this.touch()
 
       this.addDomainEvent(new TaskEvent(this, TaskAction.ASSIGN))
    }
 
    reassign(teamMemberId: UniqueEntityID) {
-      const oldTeamMemberId = this.props.assignedTo
+      const oldTeamMemberId = this.props.assignedToId
 
       if (!oldTeamMemberId) {
          throw new Error()
       }
 
-      this.props.assignedTo = teamMemberId
+      this.props.assignedToId = teamMemberId
       this.touch()
 
       this.addDomainEvent(new TaskReassignedEvent(this, oldTeamMemberId))
    }
 
+   static create(props: TaskProps, id: UniqueEntityID): Task
+
    static create(
-      props: Optional<TaskProps, 'createdAt' | 'status' | 'assignedTo'>,
-      id?: UniqueEntityID,
+      props: Omit<TaskProps, 'createdAt' | 'status'>,
+      createBy: Admin | Owner,
+   ): Task
+
+   static create(
+      props: Optional<TaskProps, 'createdAt' | 'status'> | TaskProps,
+      secondProp: UniqueEntityID | Admin | Owner,
    ) {
-      const { assignedTo, ...rest } = props
-      const task = new Task(
-         {
-            ...rest,
-            createdAt: rest.createdAt ?? new Date(),
-            status: rest.status ?? 'UNASSIGN',
-         },
-         id,
-      )
-
-      const isNewTask = !id
-
-      if (!isNewTask) {
-         task.props.assignedTo = assignedTo
-         return task
+      if (secondProp instanceof UniqueEntityID) {
+         return new Task(props as TaskProps, secondProp)
       }
 
-      if (assignedTo) {
-         task.assign(assignedTo)
+      const task = new Task(
+         {
+            ...props,
+            createdAt: new Date(),
+            status: 'UNASSIGN',
+         },
+         new UniqueEntityID(),
+      )
+
+      if (props.assignedToId && props.assignedToId !== null) {
+         task.assign(props.assignedToId)
       }
 
       task.addDomainEvent(new TaskEvent(task, TaskAction.CREATED))

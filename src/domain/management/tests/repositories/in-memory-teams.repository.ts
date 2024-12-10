@@ -1,17 +1,23 @@
 import { DomainEvents } from '@/core/events/domain-events'
 
 import { Team } from '../../entities/team'
+import { TeamDetails } from '../../entities/value-objects/team-details'
+
+import { InMemoryTeamMembersRepository } from './in-memory-team-members.repository'
+import { InMemoryTasksRepository } from './in-memory-tasks.repository'
+
 import {
    TeamsRepository,
    TeamWithMembers,
 } from '../../repositories/teams.repository'
-import { InMemoryTeamMembersRepository } from './in-memory-team-members.repository'
-import { TeamDetails } from '../../entities/value-objects/team-details'
 
 export class InMemoryTeamsRepository implements TeamsRepository {
    public items: Team[] = []
 
-   constructor(public teamMembersRepository: InMemoryTeamMembersRepository) {}
+   constructor(
+      public teamMembersRepository: InMemoryTeamMembersRepository,
+      public tasksRepository: InMemoryTasksRepository,
+   ) {}
 
    async findDetailsById(id: string) {
       const team = this.items.find((item) => item.id.toString() === id)
@@ -20,6 +26,7 @@ export class InMemoryTeamsRepository implements TeamsRepository {
          return null
       }
 
+      const tasks = await this.tasksRepository.findManyByTeamId(id)
       const teamMembers =
          await this.teamMembersRepository.findManyWithNameByTeamId(id)
 
@@ -28,7 +35,7 @@ export class InMemoryTeamsRepository implements TeamsRepository {
          teamName: team.name,
          description: team.description,
          teamMembers,
-         tasks: [],
+         tasks,
       })
    }
 

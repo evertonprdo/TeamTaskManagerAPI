@@ -9,8 +9,10 @@ export function makeAdmin(
 ) {
    const admin = Admin.create(
       {
-         teamId: new UniqueEntityID(),
          userId: new UniqueEntityID(),
+         teamId: new UniqueEntityID(),
+         status: 'ACTIVE',
+         createdAt: new Date(),
          ...overwrite,
       },
       id ?? new UniqueEntityID(),

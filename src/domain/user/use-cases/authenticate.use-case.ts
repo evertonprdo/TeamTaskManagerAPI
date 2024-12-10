@@ -37,7 +37,7 @@ export class AuthenticateUseCase {
          password,
          user.password,
       )
-      console.log(isPasswordValid)
+
       if (!isPasswordValid) {
          return left(new WrongCredentialsError())
       }

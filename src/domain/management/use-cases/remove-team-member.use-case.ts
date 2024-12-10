@@ -17,7 +17,7 @@ interface RemoveTeamMemberUseCaseRequest {
 }
 
 type RemoveTeamMemberUseCaseResponse = Either<
-   ResourceNotFoundError | NotAllowedError,
+   ResourceNotFoundError | NotAllowedError | ForbiddenError,
    { teamMember: TeamMember }
 >
 
@@ -28,54 +28,52 @@ export class RemoveTeamMemberUseCase {
       teamMemberId,
       removingBy,
    }: RemoveTeamMemberUseCaseRequest): Promise<RemoveTeamMemberUseCaseResponse> {
-      const teamMember = (await this.teamMembersRepository.findById(
-         teamMemberId,
-      )) as Admin | Member
+      const teamMember = await this.teamMembersRepository.findById(teamMemberId)
 
       if (!teamMember) {
          return left(new ResourceNotFoundError())
       }
 
-      if (!teamMember.teamId.equals(removingBy.teamId)) {
-         return left(new NotAllowedError())
-      }
-
-      switch (teamMember.constructor) {
-         case Owner:
-            return left(new ForbiddenError())
-
-         case Admin:
-            if (teamMember.id.equals(removingBy.id)) {
-               break
-            }
-
-            if (removingBy instanceof Owner) {
-               break
-            }
-
-            return left(new NotAllowedError())
-
-         case Member:
-            if (teamMember.id.equals(removingBy.id)) {
-               break
-            }
-
-            const isAllowedToRemove =
-               removingBy instanceof Admin || removingBy instanceof Owner
-
-            if (isAllowedToRemove) {
-               break
-            }
-
-            return left(new NotAllowedError())
-
-         default:
-            throw new Error()
+      const removeError = this.getRemoveError(teamMember, removingBy)
+      if (removeError) {
+         return left(removeError)
       }
 
       teamMember.remove(removingBy)
       await this.teamMembersRepository.save(teamMember)
 
       return right({ teamMember })
+   }
+
+   private getRemoveError(teamMember: TeamMember, removingBy: TeamMember) {
+      const isQuitting = teamMember.id.equals(removingBy.id)
+
+      switch (teamMember.constructor) {
+         case Owner:
+            return new ForbiddenError()
+
+         case Admin:
+            if (isQuitting) {
+               break
+            }
+            if (removingBy instanceof Owner) {
+               break
+            }
+
+            return new NotAllowedError()
+
+         case Member:
+            if (isQuitting) {
+               break
+            }
+            if (removingBy instanceof Admin || removingBy instanceof Owner) {
+               break
+            }
+
+            return new NotAllowedError()
+
+         default:
+            throw new Error()
+      }
    }
 }

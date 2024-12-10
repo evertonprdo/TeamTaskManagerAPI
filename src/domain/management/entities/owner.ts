@@ -5,6 +5,8 @@ import { TeamMember, TeamMemberProps } from './team-member'
 import { OwnershipPassedEvent } from '../events/ownership-passed.event'
 
 export class Owner extends TeamMember {
+   private __owner = 'owner'
+
    remove(passingOwnershipTo: TeamMember): void {
       this.touch()
 

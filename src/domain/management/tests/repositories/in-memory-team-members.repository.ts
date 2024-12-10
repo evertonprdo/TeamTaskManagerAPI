@@ -6,13 +6,21 @@ import { TeamMember, TeamMemberRole } from '../../entities/team-member'
 import { TeamMemberDetails } from '../../entities/value-objects/team-member-details'
 import { TeamMemberWithName } from '../../entities/value-objects/team-member-with-name'
 
-import { TeamMembersRepository } from '../../repositories/team-members.repository'
 import { InMemoryUsersRepository } from './in-memory-users.repository'
+import { InMemoryTasksRepository } from './in-memory-tasks.repository'
+
+import {
+   FindByUserIdAndTeamIdProps,
+   TeamMembersRepository,
+} from '../../repositories/team-members.repository'
 
 export class InMemoryTeamMembersRepository implements TeamMembersRepository {
    public items: TeamMember[] = []
 
-   constructor(public usersRepository: InMemoryUsersRepository) {}
+   constructor(
+      public usersRepository: InMemoryUsersRepository,
+      public tasksRepository: InMemoryTasksRepository,
+   ) {}
 
    async findManyByTeamId(id: string) {
       const teamMembers = this.items.filter(
@@ -57,7 +65,7 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
       return teamMembersWithName
    }
 
-   async findById(id: string): Promise<null | TeamMember> {
+   async findById(id: string, status?: boolean): Promise<null | TeamMember> {
       const teamMember = this.items.find((item) => item.id.toString() === id)
 
       if (!teamMember) {
@@ -99,6 +107,23 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
          tasks: [],
          createdAt: teamMember.createdAt,
       })
+   }
+
+   async findByUserIdAndTeamId({
+      teamId,
+      userId,
+   }: FindByUserIdAndTeamIdProps): Promise<TeamMember | null> {
+      const teamMember = this.items.find(
+         (item) =>
+            item.teamId.toString() === teamId &&
+            item.userId.toString() === userId,
+      )
+
+      if (!teamMember) {
+         return null
+      }
+
+      return teamMember
    }
 
    async create(teamMember: TeamMember): Promise<void> {

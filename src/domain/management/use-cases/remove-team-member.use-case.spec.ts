@@ -2,23 +2,30 @@ import { makeAdmin } from '../tests/factories/make-admin'
 import { makeMember } from '../tests/factories/make-member'
 import { makeOwner } from '../tests/factories/make-owner'
 
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
+import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
+import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { ForbiddenError } from '@/core/errors/forbidden.error'
 import { NotAllowedError } from '@/core/errors/not-allowed.error'
 
-import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { RemoveTeamMemberUseCase } from './remove-team-member.use-case'
 
+let tasksRepository: InMemoryTasksRepository
 let usersRepository: InMemoryUsersRepository
 let teamMembersRepository: InMemoryTeamMembersRepository
+
 let sut: RemoveTeamMemberUseCase
 
 describe('Use case: Remove team member', () => {
    beforeEach(() => {
+      tasksRepository = new InMemoryTasksRepository()
       usersRepository = new InMemoryUsersRepository()
-      teamMembersRepository = new InMemoryTeamMembersRepository(usersRepository)
+
+      teamMembersRepository = new InMemoryTeamMembersRepository(
+         usersRepository,
+         tasksRepository,
+      )
 
       sut = new RemoveTeamMemberUseCase(teamMembersRepository)
    })
@@ -150,22 +157,6 @@ describe('Use case: Remove team member', () => {
       const result = await sut.execute({
          teamMemberId: anotherMember.id.toString(),
          removingBy: member,
-      })
-
-      expect(result.isLeft()).toBe(true)
-      expect(result.value).toBeInstanceOf(NotAllowedError)
-   })
-
-   it('should not be possible to remove a member from another team', async () => {
-      const owner = makeOwner()
-      const teamMember = makeMember({
-         teamId: new UniqueEntityID('another-team'),
-      })
-      teamMembersRepository.items.push(teamMember)
-
-      const result = await sut.execute({
-         teamMemberId: teamMember.id.toString(),
-         removingBy: owner,
       })
 
       expect(result.isLeft()).toBe(true)

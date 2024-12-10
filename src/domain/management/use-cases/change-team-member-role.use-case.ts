@@ -1,7 +1,6 @@
 import { Either, left, right } from '@/core/either'
 
 import { ForbiddenError } from '@/core/errors/forbidden.error'
-import { NotAllowedError } from '@/core/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 import { TeamMemberAlreadyInRoleError } from './errors/team-member-already-in-role.error'
 
@@ -13,13 +12,12 @@ import { TeamMembersRepository } from '../repositories/team-members.repository'
 type Role = 'ADMIN' | 'MEMBER'
 
 interface ChangeTeamMemberRoleRequest {
-   changedBy: Owner
    newRole: Role
    teamMemberId: string
 }
 
 type ChangeTeamMemberRoleResponse = Either<
-   ResourceNotFoundError | TeamMemberAlreadyInRoleError,
+   ResourceNotFoundError | TeamMemberAlreadyInRoleError | ForbiddenError,
    { teamMember: Admin | Member }
 >
 
@@ -27,7 +25,6 @@ export class ChangeTeamMemberRole {
    constructor(private teamMembersRepository: TeamMembersRepository) {}
 
    async execute({
-      changedBy,
       newRole,
       teamMemberId,
    }: ChangeTeamMemberRoleRequest): Promise<ChangeTeamMemberRoleResponse> {
@@ -37,16 +34,12 @@ export class ChangeTeamMemberRole {
          return left(new ResourceNotFoundError())
       }
 
-      if (teamMember instanceof Owner) {
+      if (teamMember.status !== 'ACTIVE') {
          return left(new ForbiddenError())
       }
 
-      if (!(changedBy instanceof Owner)) {
-         return left(new NotAllowedError())
-      }
-
-      if (!teamMember.teamId.equals(changedBy.teamId)) {
-         return left(new NotAllowedError())
+      if (teamMember instanceof Owner) {
+         return left(new ForbiddenError())
       }
 
       if (teamMember.constructor.name.toUpperCase() === newRole) {
@@ -76,7 +69,7 @@ export class ChangeTeamMemberRole {
             throw new Error()
       }
 
-      updatedTeamMember.setupRoleUpdated(changedBy)
+      updatedTeamMember.setupUpdateRole()
       await this.teamMembersRepository.save(updatedTeamMember)
 
       return right({ teamMember: updatedTeamMember })

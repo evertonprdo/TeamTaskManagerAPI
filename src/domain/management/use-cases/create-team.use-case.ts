@@ -1,13 +1,11 @@
-import { Either, left, right } from '@/core/either'
-
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
+import { Either, right } from '@/core/either'
 
 import { Team } from '../entities/team'
 import { Owner } from '../entities/owner'
 
-import { UsersRepository } from '../repositories/users.repository'
 import { TeamsRepository } from '../repositories/teams.repository'
-import { OwnersRepository } from '../repositories/owners.repository'
+import { TeamMembersRepository } from '../repositories/team-members.repository'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
 interface CreateTeamUseCaseRequest {
    userId: string
@@ -16,7 +14,7 @@ interface CreateTeamUseCaseRequest {
 }
 
 type CreateTeamUseCaseResponse = Either<
-   ResourceNotFoundError,
+   null,
    {
       team: Team
       owner: Owner
@@ -25,9 +23,8 @@ type CreateTeamUseCaseResponse = Either<
 
 export class CreateTeamUseCase {
    constructor(
-      private usersRepository: UsersRepository,
       private teamsRepository: TeamsRepository,
-      private ownersRepository: OwnersRepository,
+      private teamMembersRepository: TeamMembersRepository,
    ) {}
 
    async execute({
@@ -35,12 +32,6 @@ export class CreateTeamUseCase {
       name,
       description,
    }: CreateTeamUseCaseRequest): Promise<CreateTeamUseCaseResponse> {
-      const user = await this.usersRepository.findById(userId)
-
-      if (!user) {
-         return left(new ResourceNotFoundError())
-      }
-
       const team = Team.create({
          name,
          description,
@@ -50,10 +41,10 @@ export class CreateTeamUseCase {
 
       const owner = Owner.create({
          teamId: team.id,
-         userId: user.id,
+         userId: new UniqueEntityID(userId),
       })
 
-      await this.ownersRepository.create(owner)
+      await this.teamMembersRepository.create(owner)
 
       return right({
          team,

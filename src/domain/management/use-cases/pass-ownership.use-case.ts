@@ -26,10 +26,6 @@ export class PassOwnershipUseCase {
          return left(new ResourceNotFoundError())
       }
 
-      if (!teamMember.teamId.equals(owner.teamId)) {
-         return left(new ForbiddenError())
-      }
-
       if (teamMember.status !== 'ACTIVE') {
          return left(new ForbiddenError())
       }
@@ -49,7 +45,6 @@ export class PassOwnershipUseCase {
       )
 
       await this.teamMembersRepository.save(teamMember)
-
       return right(null)
    }
 }

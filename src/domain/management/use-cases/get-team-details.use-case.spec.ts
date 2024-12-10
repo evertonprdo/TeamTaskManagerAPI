@@ -5,11 +5,13 @@ import { makeMember } from '../tests/factories/make-member'
 
 import { InMemoryTeamsRepository } from '../tests/repositories/in-memory-teams.repository'
 import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
+import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 import { GetTeamDetailsUseCase } from './get-team-details.use-case'
 
+let tasksRepository: InMemoryTasksRepository
 let usersRepository: InMemoryUsersRepository
 let teamsRepository: InMemoryTeamsRepository
 let teamMembersRepository: InMemoryTeamMembersRepository
@@ -18,9 +20,18 @@ let sut: GetTeamDetailsUseCase
 
 describe('Use case: Get team details', () => {
    beforeEach(() => {
+      tasksRepository = new InMemoryTasksRepository()
       usersRepository = new InMemoryUsersRepository()
-      teamMembersRepository = new InMemoryTeamMembersRepository(usersRepository)
-      teamsRepository = new InMemoryTeamsRepository(teamMembersRepository)
+
+      teamMembersRepository = new InMemoryTeamMembersRepository(
+         usersRepository,
+         tasksRepository,
+      )
+
+      teamsRepository = new InMemoryTeamsRepository(
+         teamMembersRepository,
+         tasksRepository,
+      )
 
       sut = new GetTeamDetailsUseCase(teamsRepository)
    })

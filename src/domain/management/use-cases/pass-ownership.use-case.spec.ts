@@ -1,18 +1,18 @@
 import { makeOwner } from '../tests/factories/make-owner'
 import { makeMember } from '../tests/factories/make-member'
 
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
+import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
+import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
-import { ForbiddenError } from '@/core/errors/forbidden.error'
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 
 import { Admin } from '../entities/admin'
 import { Owner } from '../entities/owner'
-import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
 import { PassOwnershipUseCase } from './pass-ownership.use-case'
 
+let tasksRepository: InMemoryTasksRepository
 let usersRepository: InMemoryUsersRepository
 let teamMembersRepository: InMemoryTeamMembersRepository
 
@@ -20,8 +20,13 @@ let sut: PassOwnershipUseCase
 
 describe('Use case: Pass Ownership', () => {
    beforeEach(() => {
+      tasksRepository = new InMemoryTasksRepository()
       usersRepository = new InMemoryUsersRepository()
-      teamMembersRepository = new InMemoryTeamMembersRepository(usersRepository)
+
+      teamMembersRepository = new InMemoryTeamMembersRepository(
+         usersRepository,
+         tasksRepository,
+      )
 
       sut = new PassOwnershipUseCase(teamMembersRepository)
    })
@@ -58,23 +63,5 @@ describe('Use case: Pass Ownership', () => {
 
       expect(result.isLeft()).toBe(true)
       expect(result.value).toBeInstanceOf(ResourceNotFoundError)
-   })
-
-   it('should be forbidden to pass the ownership to member from another team', async () => {
-      const owner = makeOwner()
-      const member = makeMember({
-         teamId: new UniqueEntityID('another-team'),
-         status: 'ACTIVE',
-      })
-
-      teamMembersRepository.items.push(member, owner)
-
-      const result = await sut.execute({
-         owner,
-         passToId: member.id.toString(),
-      })
-
-      expect(result.isLeft()).toBe(true)
-      expect(result.value).toBeInstanceOf(ForbiddenError)
    })
 })

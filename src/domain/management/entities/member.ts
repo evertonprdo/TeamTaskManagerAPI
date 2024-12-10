@@ -11,6 +11,12 @@ import { TeamMemberRoleUpdatedEvent } from '../events/team-member-role-updated.e
 import { TeamMemberAcceptedInvitationEvent } from '../events/team-member-accepted-invitation.event'
 
 export class Member extends TeamMember {
+   private __member = 'member'
+
+   reinviteInactive(invitedBy: Owner | Admin) {
+      this.addDomainEvent(new TeamMemberCreatedEvent(this, invitedBy))
+   }
+
    acceptInvite() {
       this.props.status = 'ACTIVE'
       this.touch()
@@ -25,36 +31,26 @@ export class Member extends TeamMember {
       this.addDomainEvent(new TeamMemberRemovedEvent(this, removedBy))
    }
 
-   setupRoleUpdated(changedBy: Admin | Owner) {
+   setupUpdateRole() {
       this.touch()
-      this.addDomainEvent(
-         new TeamMemberRoleUpdatedEvent(this, changedBy, 'ADMIN'),
-      )
+      this.addDomainEvent(new TeamMemberRoleUpdatedEvent(this, 'ADMIN'))
    }
 
-   static create(
-      props: Optional<TeamMemberProps, 'createdAt' | 'status'>,
-      id: UniqueEntityID,
-   ): Member
+   static create(props: TeamMemberProps, id: UniqueEntityID): Member
 
    static create(
       props: Omit<TeamMemberProps, 'createdAt' | 'status' | 'updatedAt'>,
-      createBy: Admin | Owner,
+      createBy: Owner | Admin,
    ): Member
 
    static create(
-      props: Optional<TeamMemberProps, 'createdAt' | 'status'>,
-      secondProp: UniqueEntityID | Admin | Owner,
+      props:
+         | Optional<TeamMemberProps, 'createdAt' | 'status'>
+         | TeamMemberProps,
+      secondProp: UniqueEntityID | Owner | Admin,
    ) {
       if (secondProp instanceof UniqueEntityID) {
-         return new Member(
-            {
-               ...props,
-               createdAt: props.createdAt ?? new Date(),
-               status: props.status ?? 'INVITED',
-            },
-            secondProp,
-         )
+         return new Member(props as TeamMemberProps, secondProp)
       }
 
       const member = new Member({
