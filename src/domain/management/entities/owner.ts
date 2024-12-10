@@ -6,7 +6,6 @@ import { OwnershipPassedEvent } from '../events/ownership-passed.event'
 
 export class Owner extends TeamMember {
    remove(passingOwnershipTo: TeamMember): void {
-      this.props.status = 'INACTIVE'
       this.touch()
 
       this.addDomainEvent(new OwnershipPassedEvent(this, passingOwnershipTo))
@@ -20,7 +19,7 @@ export class Owner extends TeamMember {
          {
             ...props,
             createdAt: props.createdAt ?? new Date(),
-            status: props.status ?? 'INVITED',
+            status: props.status ?? 'ACTIVE',
          },
          id,
       )

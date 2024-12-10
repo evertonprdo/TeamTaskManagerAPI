@@ -7,6 +7,7 @@ import { TeamMember, TeamMemberProps } from './team-member'
 
 import { TeamMemberCreatedEvent } from '../events/team-member-created.event'
 import { TeamMemberRemovedEvent } from '../events/team-member-removed.event'
+import { TeamMemberRoleUpdatedEvent } from '../events/team-member-role-updated.event'
 import { TeamMemberAcceptedInvitationEvent } from '../events/team-member-accepted-invitation.event'
 
 export class Member extends TeamMember {
@@ -22,6 +23,13 @@ export class Member extends TeamMember {
       this.touch()
 
       this.addDomainEvent(new TeamMemberRemovedEvent(this, removedBy))
+   }
+
+   setupRoleUpdated(changedBy: Admin | Owner) {
+      this.touch()
+      this.addDomainEvent(
+         new TeamMemberRoleUpdatedEvent(this, changedBy, 'ADMIN'),
+      )
    }
 
    static create(

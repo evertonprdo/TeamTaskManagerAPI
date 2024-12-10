@@ -7,6 +7,7 @@ import { TeamMember, TeamMemberProps } from './team-member'
 import { TeamMemberCreatedEvent } from '../events/team-member-created.event'
 import { TeamMemberRemovedEvent } from '../events/team-member-removed.event'
 import { TeamMemberAcceptedInvitationEvent } from '../events/team-member-accepted-invitation.event'
+import { TeamMemberRoleUpdatedEvent } from '../events/team-member-role-updated.event'
 
 export interface CreateAdminProps {
    props: Optional<TeamMemberProps, 'createdAt' | 'status'>
@@ -27,6 +28,13 @@ export class Admin extends TeamMember {
       this.touch()
 
       this.addDomainEvent(new TeamMemberRemovedEvent(this, removedBy))
+   }
+
+   setupRoleUpdated(changedBy: Owner) {
+      this.touch()
+      this.addDomainEvent(
+         new TeamMemberRoleUpdatedEvent(this, changedBy, 'MEMBER'),
+      )
    }
 
    static create(

@@ -33,6 +33,10 @@ export abstract class TeamMember<
       return this.props.createdAt
    }
 
+   get updatedAt() {
+      return this.props.updatedAt
+   }
+
    protected touch() {
       this.props.updatedAt = new Date()
    }
