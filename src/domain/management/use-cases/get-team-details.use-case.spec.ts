@@ -3,57 +3,43 @@ import { makeUser } from '../tests/factories/make-user'
 import { makeOwner } from '../tests/factories/make-owner'
 import { makeMember } from '../tests/factories/make-member'
 
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTeamsRepository } from '../tests/repositories/in-memory-teams.repository'
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 import { GetTeamDetailsUseCase } from './get-team-details.use-case'
 
-let tasksRepository: InMemoryTasksRepository
-let usersRepository: InMemoryUsersRepository
+let inMemoryDatabase: InMemoryDatabase
 let teamsRepository: InMemoryTeamsRepository
-let teamMembersRepository: InMemoryTeamMembersRepository
 
 let sut: GetTeamDetailsUseCase
 
 describe('Use case: Get team details', () => {
    beforeEach(() => {
-      tasksRepository = new InMemoryTasksRepository()
-      usersRepository = new InMemoryUsersRepository()
-
-      teamMembersRepository = new InMemoryTeamMembersRepository(
-         usersRepository,
-         tasksRepository,
-      )
-
-      teamsRepository = new InMemoryTeamsRepository(
-         teamMembersRepository,
-         tasksRepository,
-      )
+      inMemoryDatabase = new InMemoryDatabase()
+      teamsRepository = new InMemoryTeamsRepository(inMemoryDatabase)
 
       sut = new GetTeamDetailsUseCase(teamsRepository)
    })
 
    it('should get team details by id', async () => {
       const team = makeTeam()
-      teamsRepository.items.push(team)
+      inMemoryDatabase.teams.push(team)
 
       const userOwner = makeUser()
-      usersRepository.items.push(userOwner)
+      inMemoryDatabase.users.push(userOwner)
 
       const owner = makeOwner({ teamId: team.id, userId: userOwner.id })
-      teamMembersRepository.items.push(owner)
+      inMemoryDatabase.team_members.push(owner)
 
       const users = Array.from({ length: 3 }, () => makeUser())
-      usersRepository.items.push(...users)
+      inMemoryDatabase.users.push(...users)
 
       const members = users.map((user) =>
          makeMember({ userId: user.id, teamId: team.id }),
       )
 
-      teamMembersRepository.items.push(...members)
+      inMemoryDatabase.team_members.push(...members)
 
       const result = await sut.execute({ teamId: team.id.toString() })
 

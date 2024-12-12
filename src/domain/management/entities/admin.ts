@@ -1,5 +1,4 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
-import { Optional } from '@/core/types/optional'
 
 import { Owner } from './owner'
 import { TeamMember, TeamMemberProps } from './team-member'
@@ -8,12 +7,6 @@ import { TeamMemberCreatedEvent } from '../events/team-member-created.event'
 import { TeamMemberRemovedEvent } from '../events/team-member-removed.event'
 import { TeamMemberRoleUpdatedEvent } from '../events/team-member-role-updated.event'
 import { TeamMemberAcceptedInvitationEvent } from '../events/team-member-accepted-invitation.event'
-
-export interface CreateAdminProps {
-   props: Optional<TeamMemberProps, 'createdAt' | 'status'>
-   id?: UniqueEntityID
-   createBy?: Admin | Owner
-}
 
 export class Admin extends TeamMember {
    private __admin = 'admin'
@@ -49,9 +42,7 @@ export class Admin extends TeamMember {
    ): Admin
 
    static create(
-      props:
-         | Optional<TeamMemberProps, 'createdAt' | 'status'>
-         | TeamMemberProps,
+      props: Omit<TeamMemberProps, 'createdAt' | 'status'> | TeamMemberProps,
       secondProp: UniqueEntityID | Owner,
    ) {
       if (secondProp instanceof UniqueEntityID) {

@@ -1,5 +1,4 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
-import { Optional } from '@/core/types/optional'
 
 import { Admin } from './admin'
 import { Owner } from './owner'
@@ -44,9 +43,7 @@ export class Member extends TeamMember {
    ): Member
 
    static create(
-      props:
-         | Optional<TeamMemberProps, 'createdAt' | 'status'>
-         | TeamMemberProps,
+      props: Omit<TeamMemberProps, 'createdAt' | 'status'> | TeamMemberProps,
       secondProp: UniqueEntityID | Owner | Admin,
    ) {
       if (secondProp instanceof UniqueEntityID) {

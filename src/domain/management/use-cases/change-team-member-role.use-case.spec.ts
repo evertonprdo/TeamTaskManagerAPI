@@ -2,8 +2,7 @@ import { makeAdmin } from '../tests/factories/make-admin'
 import { makeMember } from '../tests/factories/make-member'
 import { makeOwner } from '../tests/factories/make-owner'
 
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { ForbiddenError } from '@/core/errors/forbidden.error'
@@ -14,19 +13,17 @@ import { Member } from '../entities/member'
 
 import { ChangeTeamMemberRole } from './change-team-member-role.use-case'
 
-let tasksRepository: InMemoryTasksRepository
-let usersRepository: InMemoryUsersRepository
+let inMemoryDatabase: InMemoryDatabase
 let teamMembersRepository: InMemoryTeamMembersRepository
 
 let sut: ChangeTeamMemberRole
 
 describe('Use case: Change team member role', () => {
    beforeEach(() => {
-      tasksRepository = new InMemoryTasksRepository()
-      usersRepository = new InMemoryUsersRepository()
+      inMemoryDatabase = new InMemoryDatabase()
+
       teamMembersRepository = new InMemoryTeamMembersRepository(
-         usersRepository,
-         tasksRepository,
+         inMemoryDatabase,
       )
 
       sut = new ChangeTeamMemberRole(teamMembersRepository)
@@ -36,7 +33,7 @@ describe('Use case: Change team member role', () => {
       const owner = makeOwner()
       const member = makeMember({ teamId: owner.teamId })
 
-      teamMembersRepository.items.push(owner, member)
+      inMemoryDatabase.team_members.push(owner, member)
 
       const result = await sut.execute({
          newRole: 'ADMIN',
@@ -56,7 +53,7 @@ describe('Use case: Change team member role', () => {
       const owner = makeOwner()
       const member = makeAdmin({ teamId: owner.teamId })
 
-      teamMembersRepository.items.push(owner, member)
+      inMemoryDatabase.team_members.push(owner, member)
 
       const result = await sut.execute({
          newRole: 'MEMBER',
@@ -74,7 +71,7 @@ describe('Use case: Change team member role', () => {
 
    it('should be forbidden change a owner role directly', async () => {
       const owner = makeOwner()
-      teamMembersRepository.items.push(owner)
+      inMemoryDatabase.team_members.push(owner)
 
       const result = await sut.execute({
          newRole: 'MEMBER',
@@ -89,7 +86,7 @@ describe('Use case: Change team member role', () => {
       const owner = makeOwner()
       const member = makeMember({ teamId: owner.teamId, status: 'INVITED' })
 
-      teamMembersRepository.items.push(owner, member)
+      inMemoryDatabase.team_members.push(owner, member)
 
       const result = await sut.execute({
          newRole: 'ADMIN',
@@ -104,7 +101,7 @@ describe('Use case: Change team member role', () => {
       const owner = makeOwner()
       const member = makeMember({ teamId: owner.teamId })
 
-      teamMembersRepository.items.push(owner, member)
+      inMemoryDatabase.team_members.push(owner, member)
 
       const result = await sut.execute({
          newRole: 'MEMBER',

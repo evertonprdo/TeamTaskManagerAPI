@@ -1,34 +1,27 @@
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTeamsRepository } from '../tests/repositories/in-memory-teams.repository'
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
+import { Owner } from '../entities/owner'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
-import { Owner } from '../entities/owner'
 import { CreateTeamUseCase } from './create-team.use-case'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
 
-let tasksRepository: InMemoryTasksRepository
-let teamMembersRepository: InMemoryTeamMembersRepository
-let usersRepository: InMemoryUsersRepository
+let inMemoryDatabase: InMemoryDatabase
+
 let teamsRepository: InMemoryTeamsRepository
+let teamMembersRepository: InMemoryTeamMembersRepository
 
 let sut: CreateTeamUseCase
 
 describe('Use case: Create team', () => {
    beforeEach(() => {
-      tasksRepository = new InMemoryTasksRepository()
-      usersRepository = new InMemoryUsersRepository()
+      inMemoryDatabase = new InMemoryDatabase()
 
       teamMembersRepository = new InMemoryTeamMembersRepository(
-         usersRepository,
-         tasksRepository,
+         inMemoryDatabase,
       )
-
-      teamsRepository = new InMemoryTeamsRepository(
-         teamMembersRepository,
-         tasksRepository,
-      )
+      teamsRepository = new InMemoryTeamsRepository(inMemoryDatabase)
 
       sut = new CreateTeamUseCase(teamsRepository, teamMembersRepository)
    })
@@ -52,7 +45,7 @@ describe('Use case: Create team', () => {
       })
       expect(result.value.owner).toBeInstanceOf(Owner)
 
-      expect(result.value.owner).toEqual(teamMembersRepository.items[0])
-      expect(result.value.team).toEqual(teamsRepository.items[0])
+      expect(result.value.owner).toEqual(inMemoryDatabase.team_members[0])
+      expect(result.value.team).toEqual(inMemoryDatabase.teams[0])
    })
 })

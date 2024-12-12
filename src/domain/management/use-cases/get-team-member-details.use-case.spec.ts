@@ -1,26 +1,21 @@
 import { makeMember } from '../tests/factories/make-member'
 import { makeUser } from '../tests/factories/make-user'
 
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { GetTeamMemberDetailsUseCase } from './get-team-member-details.use-case'
 
-let tasksRepository: InMemoryTasksRepository
-let usersRepository: InMemoryUsersRepository
+let inMemoryDatabase: InMemoryDatabase
 let teamMembersRepository: InMemoryTeamMembersRepository
 
 let sut: GetTeamMemberDetailsUseCase
 
 describe('Use case: Get Team Member Details', () => {
    beforeEach(() => {
-      tasksRepository = new InMemoryTasksRepository()
-      usersRepository = new InMemoryUsersRepository()
-
+      inMemoryDatabase = new InMemoryDatabase()
       teamMembersRepository = new InMemoryTeamMembersRepository(
-         usersRepository,
-         tasksRepository,
+         inMemoryDatabase,
       )
 
       sut = new GetTeamMemberDetailsUseCase(teamMembersRepository)
@@ -28,10 +23,10 @@ describe('Use case: Get Team Member Details', () => {
 
    it('should get details about a team member', async () => {
       const user = makeUser()
-      usersRepository.items.push(user)
+      inMemoryDatabase.users.push(user)
 
       const teamMember = makeMember({ userId: user.id })
-      teamMembersRepository.items.push(teamMember)
+      inMemoryDatabase.team_members.push(teamMember)
 
       const result = await sut.execute({
          teamMemberId: teamMember.id.toString(),

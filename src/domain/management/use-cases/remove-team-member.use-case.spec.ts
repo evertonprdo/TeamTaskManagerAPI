@@ -2,29 +2,25 @@ import { makeAdmin } from '../tests/factories/make-admin'
 import { makeMember } from '../tests/factories/make-member'
 import { makeOwner } from '../tests/factories/make-owner'
 
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { ForbiddenError } from '@/core/errors/forbidden.error'
 import { NotAllowedError } from '@/core/errors/not-allowed.error'
 
 import { RemoveTeamMemberUseCase } from './remove-team-member.use-case'
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 
-let tasksRepository: InMemoryTasksRepository
-let usersRepository: InMemoryUsersRepository
+let inMemoryDatabase: InMemoryDatabase
 let teamMembersRepository: InMemoryTeamMembersRepository
 
 let sut: RemoveTeamMemberUseCase
 
 describe('Use case: Remove team member', () => {
    beforeEach(() => {
-      tasksRepository = new InMemoryTasksRepository()
-      usersRepository = new InMemoryUsersRepository()
+      inMemoryDatabase = new InMemoryDatabase()
 
       teamMembersRepository = new InMemoryTeamMembersRepository(
-         usersRepository,
-         tasksRepository,
+         inMemoryDatabase,
       )
 
       sut = new RemoveTeamMemberUseCase(teamMembersRepository)
@@ -33,7 +29,7 @@ describe('Use case: Remove team member', () => {
    it('should be possible for the owner to remove a member from a team', async () => {
       const owner = makeOwner()
       const teamMember = makeMember({ teamId: owner.teamId })
-      teamMembersRepository.items.push(teamMember)
+      inMemoryDatabase.team_members.push(teamMember)
 
       const result = await sut.execute({
          teamMemberId: teamMember.id.toString(),
@@ -49,7 +45,7 @@ describe('Use case: Remove team member', () => {
    it('should be possible for the owner to remove an admin from a team', async () => {
       const owner = makeOwner()
       const admin = makeAdmin({ teamId: owner.teamId })
-      teamMembersRepository.items.push(admin)
+      inMemoryDatabase.team_members.push(admin)
 
       const result = await sut.execute({
          teamMemberId: admin.id.toString(),
@@ -64,7 +60,7 @@ describe('Use case: Remove team member', () => {
 
    it('should not be possible for the owner to be directly removed from a team', async () => {
       const owner = makeOwner()
-      teamMembersRepository.items.push(owner)
+      inMemoryDatabase.team_members.push(owner)
 
       const result = await sut.execute({
          teamMemberId: owner.id.toString(),
@@ -78,7 +74,7 @@ describe('Use case: Remove team member', () => {
    it('should be possible for an admin to remove a member from a team', async () => {
       const admin = makeAdmin()
       const teamMember = makeMember({ teamId: admin.teamId })
-      teamMembersRepository.items.push(teamMember)
+      inMemoryDatabase.team_members.push(teamMember)
 
       const result = await sut.execute({
          teamMemberId: teamMember.id.toString(),
@@ -93,7 +89,7 @@ describe('Use case: Remove team member', () => {
 
    it('should be possible to an admin to quit from a team', async () => {
       const admin = makeAdmin()
-      teamMembersRepository.items.push(admin)
+      inMemoryDatabase.team_members.push(admin)
 
       const result = await sut.execute({
          teamMemberId: admin.id.toString(),
@@ -109,7 +105,7 @@ describe('Use case: Remove team member', () => {
    it('should not be possible for an admin to remove another admin from a team', async () => {
       const admin = makeAdmin()
       const anotherAdmin = makeAdmin({ teamId: admin.teamId })
-      teamMembersRepository.items.push(anotherAdmin)
+      inMemoryDatabase.team_members.push(anotherAdmin)
 
       const result = await sut.execute({
          teamMemberId: anotherAdmin.id.toString(),
@@ -122,7 +118,7 @@ describe('Use case: Remove team member', () => {
 
    it('should be possible to a member to quit from a team', async () => {
       const member = makeMember()
-      teamMembersRepository.items.push(member)
+      inMemoryDatabase.team_members.push(member)
 
       const result = await sut.execute({
          teamMemberId: member.id.toString(),
@@ -138,7 +134,7 @@ describe('Use case: Remove team member', () => {
    it('should not be possible to a member to remove an admin', async () => {
       const member = makeMember()
       const admin = makeAdmin()
-      teamMembersRepository.items.push(admin)
+      inMemoryDatabase.team_members.push(admin)
 
       const result = await sut.execute({
          teamMemberId: admin.id.toString(),
@@ -152,7 +148,7 @@ describe('Use case: Remove team member', () => {
    it('should not be possible to a member to remove another member', async () => {
       const member = makeMember()
       const anotherMember = makeMember()
-      teamMembersRepository.items.push(anotherMember)
+      inMemoryDatabase.team_members.push(anotherMember)
 
       const result = await sut.execute({
          teamMemberId: anotherMember.id.toString(),

@@ -1,8 +1,6 @@
 import { makeOwner } from '../tests/factories/make-owner'
 import { makeMember } from '../tests/factories/make-member'
 
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
@@ -11,21 +9,19 @@ import { Admin } from '../entities/admin'
 import { Owner } from '../entities/owner'
 
 import { PassOwnershipUseCase } from './pass-ownership.use-case'
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 
-let tasksRepository: InMemoryTasksRepository
-let usersRepository: InMemoryUsersRepository
+let inMemoryDatabase: InMemoryDatabase
 let teamMembersRepository: InMemoryTeamMembersRepository
 
 let sut: PassOwnershipUseCase
 
 describe('Use case: Pass Ownership', () => {
    beforeEach(() => {
-      tasksRepository = new InMemoryTasksRepository()
-      usersRepository = new InMemoryUsersRepository()
+      inMemoryDatabase = new InMemoryDatabase()
 
       teamMembersRepository = new InMemoryTeamMembersRepository(
-         usersRepository,
-         tasksRepository,
+         inMemoryDatabase,
       )
 
       sut = new PassOwnershipUseCase(teamMembersRepository)
@@ -35,7 +31,7 @@ describe('Use case: Pass Ownership', () => {
       const owner = makeOwner()
       const member = makeMember({ teamId: owner.teamId, status: 'ACTIVE' })
 
-      teamMembersRepository.items.push(member, owner)
+      inMemoryDatabase.team_members.push(member, owner)
 
       const result = await sut.execute({
          owner,

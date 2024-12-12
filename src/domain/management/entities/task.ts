@@ -1,4 +1,3 @@
-import { Optional } from '@/core/types/optional'
 import { AggregateRoot } from '@/core/entities/aggregate-root'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
@@ -129,7 +128,7 @@ export class Task extends AggregateRoot<TaskProps> {
    ): Task
 
    static create(
-      props: Optional<TaskProps, 'createdAt' | 'status'> | TaskProps,
+      props: Omit<TaskProps, 'createdAt' | 'status'> | TaskProps,
       secondProp: UniqueEntityID | Admin | Owner,
    ) {
       if (secondProp instanceof UniqueEntityID) {

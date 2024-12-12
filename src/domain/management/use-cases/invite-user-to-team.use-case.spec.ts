@@ -3,8 +3,8 @@ import { makeAdmin } from '../tests/factories/make-admin'
 import { makeOwner } from '../tests/factories/make-owner'
 import { makeMember } from '../tests/factories/make-member'
 
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { NotAllowedError } from '@/core/errors/not-allowed.error'
@@ -17,7 +17,7 @@ import { Member } from '../entities/member'
 
 import { InviteUserToTeamUseCase } from './invite-user-to-team.use-case'
 
-let tasksRepository: InMemoryTasksRepository
+let inMemoryDatabase: InMemoryDatabase
 let usersRepository: InMemoryUsersRepository
 let teamMembersRepository: InMemoryTeamMembersRepository
 
@@ -25,12 +25,11 @@ let sut: InviteUserToTeamUseCase
 
 describe('Use case: Invite user to team', () => {
    beforeEach(() => {
-      tasksRepository = new InMemoryTasksRepository()
-      usersRepository = new InMemoryUsersRepository()
+      inMemoryDatabase = new InMemoryDatabase()
+      usersRepository = new InMemoryUsersRepository(inMemoryDatabase)
 
       teamMembersRepository = new InMemoryTeamMembersRepository(
-         usersRepository,
-         tasksRepository,
+         inMemoryDatabase,
       )
 
       sut = new InviteUserToTeamUseCase(usersRepository, teamMembersRepository)
@@ -38,10 +37,10 @@ describe('Use case: Invite user to team', () => {
 
    it('should invite a user to a team by email', async () => {
       const owner = makeOwner()
-      teamMembersRepository.items.push(owner)
+      inMemoryDatabase.team_members.push(owner)
 
       const user = makeUser()
-      usersRepository.items.push(user)
+      inMemoryDatabase.users.push(user)
 
       const result = await sut.execute({
          email: user.email,
@@ -62,15 +61,15 @@ describe('Use case: Invite user to team', () => {
       })
 
       expect(result.value.teamMember).toBeInstanceOf(Member)
-      expect(teamMembersRepository.items[1]).toEqual(result.value.teamMember)
+      expect(inMemoryDatabase.team_members[1]).toEqual(result.value.teamMember)
    })
 
    it('should not be possible to an Admin invite a user as admin', async () => {
       const admin = makeAdmin()
-      teamMembersRepository.items.push(admin)
+      inMemoryDatabase.team_members.push(admin)
 
       const user = makeUser()
-      usersRepository.items.push(user)
+      inMemoryDatabase.users.push(user)
 
       const result = await sut.execute({
          email: user.email,
@@ -97,17 +96,17 @@ describe('Use case: Invite user to team', () => {
 
    it('should not be possible to invite the same user twice', async () => {
       const owner = makeOwner()
-      teamMembersRepository.items.push(owner)
+      inMemoryDatabase.team_members.push(owner)
 
       const user = makeUser()
-      usersRepository.items.push(user)
+      inMemoryDatabase.users.push(user)
 
       const teamMember = makeMember({
          teamId: owner.teamId,
          userId: user.id,
          status: 'INVITED',
       })
-      teamMembersRepository.items.push(teamMember)
+      inMemoryDatabase.team_members.push(teamMember)
 
       const result = await sut.execute({
          email: user.email,
@@ -121,17 +120,17 @@ describe('Use case: Invite user to team', () => {
 
    it('should not be possible to invite a member who is already on the team', async () => {
       const owner = makeOwner()
-      teamMembersRepository.items.push(owner)
+      inMemoryDatabase.team_members.push(owner)
 
       const user = makeUser()
-      usersRepository.items.push(user)
+      inMemoryDatabase.users.push(user)
 
       const teamMember = makeMember({
          teamId: owner.teamId,
          userId: user.id,
          status: 'ACTIVE',
       })
-      teamMembersRepository.items.push(teamMember)
+      inMemoryDatabase.team_members.push(teamMember)
 
       const result = await sut.execute({
          email: user.email,
@@ -145,17 +144,17 @@ describe('Use case: Invite user to team', () => {
 
    it('should be possible to re-invite an ex-member with the new desired role. case: Member to Member', async () => {
       const owner = makeOwner()
-      teamMembersRepository.items.push(owner)
+      inMemoryDatabase.team_members.push(owner)
 
       const user = makeUser()
-      usersRepository.items.push(user)
+      inMemoryDatabase.users.push(user)
 
       const member = makeMember({
          teamId: owner.teamId,
          userId: user.id,
          status: 'INACTIVE',
       })
-      teamMembersRepository.items.push(member)
+      inMemoryDatabase.team_members.push(member)
 
       const result = await sut.execute({
          email: user.email,
@@ -174,17 +173,17 @@ describe('Use case: Invite user to team', () => {
 
    it('should be possible to re-invite an ex-member with the new desired role. case: Admin to Admin', async () => {
       const owner = makeOwner()
-      teamMembersRepository.items.push(owner)
+      inMemoryDatabase.team_members.push(owner)
 
       const user = makeUser()
-      usersRepository.items.push(user)
+      inMemoryDatabase.users.push(user)
 
       const admin = makeAdmin({
          teamId: owner.teamId,
          userId: user.id,
          status: 'INACTIVE',
       })
-      teamMembersRepository.items.push(admin)
+      inMemoryDatabase.team_members.push(admin)
 
       const result = await sut.execute({
          email: user.email,
@@ -203,17 +202,17 @@ describe('Use case: Invite user to team', () => {
 
    it('should be possible to re-invite an ex-member with the new desired role. case: Member to Admin', async () => {
       const owner = makeOwner()
-      teamMembersRepository.items.push(owner)
+      inMemoryDatabase.team_members.push(owner)
 
       const user = makeUser()
-      usersRepository.items.push(user)
+      inMemoryDatabase.users.push(user)
 
       const member = makeMember({
          teamId: owner.teamId,
          userId: user.id,
          status: 'INACTIVE',
       })
-      teamMembersRepository.items.push(member)
+      inMemoryDatabase.team_members.push(member)
 
       const result = await sut.execute({
          email: user.email,

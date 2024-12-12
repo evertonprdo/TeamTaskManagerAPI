@@ -1,8 +1,8 @@
 import { ValueObject } from '@/core/entities/value-object'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
-import { Task } from '../task'
 import { TeamMemberWithName } from './team-member-with-name'
+import { TaskWithAssignedTo } from './task-with-assigned-to'
 
 export interface TeamDetailsProps {
    id: UniqueEntityID
@@ -10,7 +10,7 @@ export interface TeamDetailsProps {
    description: string
 
    teamMembers: TeamMemberWithName[]
-   tasks: Task[]
+   tasks: TaskWithAssignedTo[]
 }
 
 export class TeamDetails extends ValueObject<TeamDetailsProps> {

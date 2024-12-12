@@ -6,24 +6,19 @@ import { TeamMember, TeamMemberRole } from '../../entities/team-member'
 import { TeamMemberDetails } from '../../entities/value-objects/team-member-details'
 import { TeamMemberWithName } from '../../entities/value-objects/team-member-with-name'
 
-import { InMemoryUsersRepository } from './in-memory-users.repository'
-import { InMemoryTasksRepository } from './in-memory-tasks.repository'
-
 import {
    FindByUserIdAndTeamIdProps,
    TeamMembersRepository,
 } from '../../repositories/team-members.repository'
+import { InMemoryDatabase } from './in-memory-database'
+
+const TABLE = 'team_members'
 
 export class InMemoryTeamMembersRepository implements TeamMembersRepository {
-   public items: TeamMember[] = []
-
-   constructor(
-      public usersRepository: InMemoryUsersRepository,
-      public tasksRepository: InMemoryTasksRepository,
-   ) {}
+   constructor(private db: InMemoryDatabase) {}
 
    async findManyByTeamId(id: string) {
-      const teamMembers = this.items.filter(
+      const teamMembers = this.db[TABLE].filter(
          (item) => item.teamId.toString() === id,
       )
 
@@ -31,15 +26,15 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
    }
 
    async findManyWithNameByTeamId(id: string) {
-      const teamMembers = this.items.filter(
+      const teamMembers = this.db[TABLE].filter(
          (item) => item.teamId.toString() === id,
       )
 
       const teamMembersWithName: TeamMemberWithName[] = []
 
       for (const member of teamMembers) {
-         const user = await this.usersRepository.findById(
-            member.userId.toString(),
+         const user = this.db.users.find((item) =>
+            item.id.equals(member.userId),
          )
 
          if (!user) {
@@ -66,7 +61,9 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
    }
 
    async findById(id: string, status?: boolean): Promise<null | TeamMember> {
-      const teamMember = this.items.find((item) => item.id.toString() === id)
+      const teamMember = this.db[TABLE].find(
+         (item) => item.id.toString() === id,
+      )
 
       if (!teamMember) {
          return null
@@ -80,14 +77,16 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
    }
 
    async findDetailsById(id: string): Promise<null | TeamMemberDetails> {
-      const teamMember = this.items.find((item) => item.id.toString() === id)
+      const teamMember = this.db[TABLE].find(
+         (item) => item.id.toString() === id,
+      )
 
       if (!teamMember) {
          return null
       }
 
-      const user = await this.usersRepository.findById(
-         teamMember.userId.toString(),
+      const user = this.db.users.find((item) =>
+         item.id.equals(teamMember.userId),
       )
 
       if (!user) {
@@ -113,7 +112,7 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
       teamId,
       userId,
    }: FindByUserIdAndTeamIdProps): Promise<TeamMember | null> {
-      const teamMember = this.items.find(
+      const teamMember = this.db[TABLE].find(
          (item) =>
             item.teamId.toString() === teamId &&
             item.userId.toString() === userId,
@@ -127,11 +126,11 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
    }
 
    async create(teamMember: TeamMember): Promise<void> {
-      this.items.push(teamMember)
+      this.db[TABLE].push(teamMember)
    }
 
    async save(teamMember: TeamMember): Promise<void> {
-      const memberIndex = this.items.findIndex((item) =>
+      const memberIndex = this.db[TABLE].findIndex((item) =>
          item.id.equals(teamMember.id),
       )
 
@@ -139,12 +138,12 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
          throw new Error()
       }
 
-      this.items[memberIndex] = teamMember
+      this.db[TABLE][memberIndex] = teamMember
       DomainEvents.dispatchEventsForAggregate(teamMember.id)
    }
 
    async removeOwner(owner: Owner): Promise<void> {
-      const ownerIndex = this.items.findIndex((item) =>
+      const ownerIndex = this.db[TABLE].findIndex((item) =>
          item.id.equals(owner.id),
       )
 
@@ -152,7 +151,7 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
          throw new Error()
       }
 
-      this.items[ownerIndex] = Admin.create(
+      this.db[TABLE][ownerIndex] = Admin.create(
          {
             teamId: owner.teamId,
             userId: owner.userId,

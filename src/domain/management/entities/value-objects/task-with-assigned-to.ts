@@ -4,8 +4,8 @@ import { TaskPriority, TaskStatus } from '../task'
 import { TeamMemberWithName } from './team-member-with-name'
 import { ValueObject } from '@/core/entities/value-object'
 
-export interface TaskWithAssignToProps {
-   id: string
+export interface TaskWithAssignedToProps {
+   id: UniqueEntityID
 
    title: string
    description: string
@@ -19,7 +19,7 @@ export interface TaskWithAssignToProps {
    updatedAt?: Date | null
 }
 
-export class TaskWithAssignTo extends ValueObject<TaskWithAssignToProps> {
+export class TaskWithAssignedTo extends ValueObject<TaskWithAssignedToProps> {
    get id() {
       return this.props.id
    }
@@ -56,7 +56,7 @@ export class TaskWithAssignTo extends ValueObject<TaskWithAssignToProps> {
       return this.props.updatedAt
    }
 
-   static create(props: TaskWithAssignToProps) {
-      return new TaskWithAssignTo(props)
+   static create(props: TaskWithAssignedToProps) {
+      return new TaskWithAssignedTo(props)
    }
 }

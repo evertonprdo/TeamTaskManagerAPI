@@ -1,40 +1,27 @@
 import { makeTeam } from '../tests/factories/make-team'
 
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTeamsRepository } from '../tests/repositories/in-memory-teams.repository'
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 import { RemoveTeamUseCase } from './remove-team.use-case'
 
-let tasksRepository: InMemoryTasksRepository
-let teamMembersRepository: InMemoryTeamMembersRepository
-let usersRepository: InMemoryUsersRepository
+let inMemoryDatabase: InMemoryDatabase
 let teamsRepository: InMemoryTeamsRepository
 
 let sut: RemoveTeamUseCase
 
 describe('Use case: Remove team', () => {
    beforeEach(() => {
-      tasksRepository = new InMemoryTasksRepository()
-      usersRepository = new InMemoryUsersRepository()
-
-      teamMembersRepository = new InMemoryTeamMembersRepository(
-         usersRepository,
-         tasksRepository,
-      )
-      teamsRepository = new InMemoryTeamsRepository(
-         teamMembersRepository,
-         tasksRepository,
-      )
+      inMemoryDatabase = new InMemoryDatabase()
+      teamsRepository = new InMemoryTeamsRepository(inMemoryDatabase)
 
       sut = new RemoveTeamUseCase(teamsRepository)
    })
 
    it('should remove a team', async () => {
       const team = makeTeam()
-      teamsRepository.items.push(team)
+      inMemoryDatabase.teams.push(team)
 
       const result = await sut.execute({ teamId: team.id.toString() })
 

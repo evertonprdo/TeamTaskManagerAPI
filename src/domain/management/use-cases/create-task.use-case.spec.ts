@@ -1,7 +1,7 @@
 import { makeAdmin } from '../tests/factories/make-admin'
 
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { ForbiddenError } from '@/core/errors/forbidden.error'
@@ -9,20 +9,20 @@ import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 
 import { CreateTaskUseCase } from './create-task.use-case'
 
-let usersRepository: InMemoryUsersRepository
-let teamMembersRepository: InMemoryTeamMembersRepository
+let inMemoryDatabase: InMemoryDatabase
+
 let tasksRepository: InMemoryTasksRepository
+let teamMembersRepository: InMemoryTeamMembersRepository
 
 let sut: CreateTaskUseCase
 
 describe('Use case: Create task', () => {
    beforeEach(() => {
-      usersRepository = new InMemoryUsersRepository()
-      tasksRepository = new InMemoryTasksRepository()
+      inMemoryDatabase = new InMemoryDatabase()
 
+      tasksRepository = new InMemoryTasksRepository(inMemoryDatabase)
       teamMembersRepository = new InMemoryTeamMembersRepository(
-         usersRepository,
-         tasksRepository,
+         inMemoryDatabase,
       )
 
       sut = new CreateTaskUseCase(tasksRepository, teamMembersRepository)
@@ -50,12 +50,12 @@ describe('Use case: Create task', () => {
          priority: 'MEDIUM',
          status: 'UNASSIGN',
       })
-      expect(result.value.task).toEqual(tasksRepository.items[0])
+      expect(result.value.task).toEqual(inMemoryDatabase.tasks[0])
    })
 
    it('should create an assigned task', async () => {
       const admin = makeAdmin()
-      teamMembersRepository.items.push(admin)
+      inMemoryDatabase.team_members.push(admin)
 
       const result = await sut.execute({
          title: 'title',
@@ -78,7 +78,7 @@ describe('Use case: Create task', () => {
          status: 'PENDING',
          assignedToId: admin.id,
       })
-      expect(result.value.task).toEqual(tasksRepository.items[0])
+      expect(result.value.task).toEqual(inMemoryDatabase.tasks[0])
    })
 
    it('should not be possible to create a assigned task to a member that does not exist', async () => {
@@ -99,7 +99,7 @@ describe('Use case: Create task', () => {
 
    it('should be forbidden to create a assigned task to a non-active member', async () => {
       const admin = makeAdmin({ status: 'INACTIVE' })
-      teamMembersRepository.items.push(admin)
+      inMemoryDatabase.team_members.push(admin)
 
       const result = await sut.execute({
          title: 'title',

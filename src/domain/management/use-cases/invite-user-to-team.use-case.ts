@@ -1,5 +1,4 @@
 import { Either, left, right } from '@/core/either'
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 
 import { User } from '../entities/user'
 import { Admin } from '../entities/admin'
@@ -11,11 +10,13 @@ import { NotAllowedError } from '@/core/errors/not-allowed.error'
 import { UserAlreadyInError } from './errors/user-already-in.error'
 import { EmailNotFoundError } from './errors/email-not-found.error'
 import { UserAlreadyInvitedError } from './errors/user-already-invited.error'
+import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 
 import { UsersRepository } from '../repositories/users.repository'
 import { TeamMembersRepository } from '../repositories/team-members.repository'
 
 type Role = 'ADMIN' | 'MEMBER'
+type RoleEntity = typeof Admin | typeof Member
 
 interface InviteUserToTeamUseCaseRequest {
    email: string
@@ -29,6 +30,15 @@ type InviteUserToTeamUseCaseResponse = Either<
 >
 
 export class InviteUserToTeamUseCase {
+   private roleMapper = {
+      ADMIN: Admin,
+      MEMBER: Member,
+   }
+   private allowedRoles = {
+      ADMIN: [Owner],
+      MEMBER: [Owner, Admin],
+   }
+
    constructor(
       private usersRepository: UsersRepository,
       private teamMembersRepository: TeamMembersRepository,
@@ -39,23 +49,12 @@ export class InviteUserToTeamUseCase {
       email,
       invitedBy,
    }: InviteUserToTeamUseCaseRequest): Promise<InviteUserToTeamUseCaseResponse> {
-      let TeamMember: typeof Admin | typeof Member
+      const isInvitedByAllowedRole = this.allowedRoles[role].some(
+         (item) => invitedBy instanceof item,
+      )
 
-      switch (role) {
-         case 'ADMIN':
-            if (invitedBy instanceof Admin) {
-               return left(new NotAllowedError())
-            }
-
-            TeamMember = Admin
-            break
-
-         case 'MEMBER':
-            TeamMember = Member
-            break
-
-         default:
-            throw new Error()
+      if (!isInvitedByAllowedRole) {
+         return left(new NotAllowedError())
       }
 
       const user = await this.usersRepository.findByEmail(email)
@@ -69,6 +68,8 @@ export class InviteUserToTeamUseCase {
             teamId: invitedBy.teamId.toString(),
             userId: user.id.toString(),
          })
+
+      const TeamMember = this.roleMapper[role]
 
       if (existingTeamMember) {
          return await this.handleExistingTeamMember(
@@ -84,7 +85,7 @@ export class InviteUserToTeamUseCase {
    private async handleNewInvite(
       user: User,
       invitedBy: Admin | Owner,
-      TeamMember: typeof Admin | typeof Member,
+      TeamMember: RoleEntity,
    ): Promise<InviteUserToTeamUseCaseResponse> {
       const teamMember = TeamMember.create(
          { teamId: invitedBy.teamId, userId: user.id },
@@ -98,7 +99,7 @@ export class InviteUserToTeamUseCase {
    private async handleExistingTeamMember(
       member: TeamMember,
       invitedBy: Admin | Owner,
-      TeamMember: typeof Admin | typeof Member,
+      TeamMember: RoleEntity,
    ): Promise<InviteUserToTeamUseCaseResponse> {
       switch (member.status) {
          case 'INVITED':

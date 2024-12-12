@@ -1,6 +1,7 @@
 import { Either, left, right } from '@/core/either'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
+import { ForbiddenError } from '@/core/errors/forbidden.error'
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 
 import { Admin } from '../entities/admin'
@@ -9,7 +10,6 @@ import { Task, TaskPriority } from '../entities/task'
 
 import { TasksRepository } from '../repositories/tasks.repository'
 import { TeamMembersRepository } from '../repositories/team-members.repository'
-import { ForbiddenError } from '@/core/errors/forbidden.error'
 
 interface CreateTaskUseCaseRequest {
    createdBy: Owner | Admin
