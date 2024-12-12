@@ -20,4 +20,5 @@ export interface TasksRepository {
 
    create(task: Task): Promise<void>
    delete(task: Task): Promise<void>
+   save(task: Task): Promise<void>
 }

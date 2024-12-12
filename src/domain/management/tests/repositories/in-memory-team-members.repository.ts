@@ -60,7 +60,7 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
       return teamMembersWithName
    }
 
-   async findById(id: string, status?: boolean): Promise<null | TeamMember> {
+   async findById(id: string): Promise<null | TeamMember> {
       const teamMember = this.db[TABLE].find(
          (item) => item.id.toString() === id,
       )

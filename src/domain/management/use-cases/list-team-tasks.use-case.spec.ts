@@ -1,9 +1,9 @@
-import { makeAdmin } from '../tests/factories/make-admin'
-import { makeMember } from '../tests/factories/make-member'
-import { makeOwner } from '../tests/factories/make-owner'
 import { makeTask } from '../tests/factories/make-task'
 import { makeTeam } from '../tests/factories/make-team'
 import { makeUser } from '../tests/factories/make-user'
+import { makeOwner } from '../tests/factories/make-owner'
+import { makeAdmin } from '../tests/factories/make-admin'
+import { makeMember } from '../tests/factories/make-member'
 
 import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'

@@ -90,6 +90,20 @@ export class InMemoryTasksRepository implements TasksRepository {
       DomainEvents.dispatchEventsForAggregate(task.id)
    }
 
+   async save(task: Task): Promise<void> {
+      const taskIndex = this.db[TABLE].findIndex((item) =>
+         item.id.equals(task.id),
+      )
+
+      if (taskIndex < 0) {
+         throw new Error()
+      }
+
+      this.db[TABLE][taskIndex] = task
+
+      DomainEvents.dispatchEventsForAggregate(task.id)
+   }
+
    async delete(task: Task): Promise<void> {
       const taskIndex = this.db[TABLE].findIndex((item) =>
          item.id.equals(task.id),
