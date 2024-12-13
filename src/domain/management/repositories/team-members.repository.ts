@@ -1,4 +1,7 @@
 import { Owner } from '../entities/owner'
+import { Admin } from '../entities/admin'
+import { Member } from '../entities/member'
+
 import { TeamMember } from '../entities/team-member'
 import { TeamMemberWithName } from '../entities/value-objects/team-member-with-name'
 
@@ -8,7 +11,7 @@ export interface FindByUserIdAndTeamIdProps {
 }
 
 export interface TeamMembersRepository {
-   fetchUserIdsToNotifyOnTeamDelete(teamId: string): Promise<string[]>
+   findManyUserIdsByTeamIdAndActive(teamId: string): Promise<string[]>
 
    findManyWithNameByTeamId(
       id: string,
@@ -24,5 +27,7 @@ export interface TeamMembersRepository {
 
    create(teamMember: TeamMember): Promise<void>
    save(teamMember: TeamMember): Promise<void>
+
    removeOwner(owner: Owner): Promise<void>
+   removeInvited(teamMember: Admin | Member): Promise<void>
 }

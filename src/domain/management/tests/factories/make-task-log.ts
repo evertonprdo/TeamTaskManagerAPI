@@ -15,7 +15,7 @@ export function makeTaskLog(
          changedAt: new Date(),
          ...overwrite,
       },
-      id ?? new UniqueEntityID(),
+      id,
    )
 
    return task

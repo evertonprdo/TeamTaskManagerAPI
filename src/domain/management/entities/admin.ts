@@ -15,6 +15,10 @@ export class Admin extends TeamMember {
       this.addDomainEvent(new TeamMemberCreatedEvent(this, invitedBy))
    }
 
+   refuseInvite() {
+      this.addDomainEvent(new TeamMemberAcceptedInvitationEvent(this))
+   }
+
    acceptInvite() {
       this.props.status = 'ACTIVE'
       this.touch()

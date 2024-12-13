@@ -21,7 +21,7 @@ export class RemoveTeamUseCase {
       team,
    }: RemoveTeamUseCaseRequest): Promise<RemoveTeamUseCaseResponse> {
       const userIds =
-         await this.teamMembersRepository.fetchUserIdsToNotifyOnTeamDelete(
+         await this.teamMembersRepository.findManyUserIdsByTeamIdAndActive(
             team.id.toString(),
          )
 

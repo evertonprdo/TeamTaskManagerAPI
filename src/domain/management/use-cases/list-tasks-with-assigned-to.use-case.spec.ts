@@ -15,7 +15,7 @@ let tasksRepository: InMemoryTasksRepository
 
 let sut: ListTasksWithAssignedToUseCase
 
-describe('Use case: List team tasks', () => {
+describe('Use case: List team tasks with assigned to', () => {
    beforeEach(() => {
       inMemoryDatabase = new InMemoryDatabase()
       tasksRepository = new InMemoryTasksRepository(inMemoryDatabase)

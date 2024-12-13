@@ -23,6 +23,10 @@ export class Member extends TeamMember {
       this.addDomainEvent(new TeamMemberAcceptedInvitationEvent(this))
    }
 
+   refuseInvite() {
+      this.addDomainEvent(new TeamMemberAcceptedInvitationEvent(this))
+   }
+
    remove(removedBy: TeamMember) {
       this.props.status = 'INACTIVE'
       this.touch()

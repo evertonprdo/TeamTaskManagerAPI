@@ -11,6 +11,7 @@ import {
    TeamMembersRepository,
 } from '../../repositories/team-members.repository'
 import { InMemoryDatabase } from './in-memory-database'
+import { Member } from '../../entities/member'
 
 const TABLE = 'team_members'
 
@@ -52,7 +53,7 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
       return teamMembersWithName
    }
 
-   async fetchUserIdsToNotifyOnTeamDelete(teamId: string): Promise<string[]> {
+   async findManyUserIdsByTeamIdAndActive(teamId: string): Promise<string[]> {
       const teamMembers = this.db.team_members
          .filter((item) => item.teamId.toString() === teamId)
          .filter((item) => item.status === 'ACTIVE')
@@ -121,6 +122,8 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
 
    async create(teamMember: TeamMember): Promise<void> {
       this.db[TABLE].push(teamMember)
+
+      DomainEvents.dispatchEventsForAggregate(teamMember.id)
    }
 
    async save(teamMember: TeamMember): Promise<void> {
@@ -156,5 +159,17 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
          owner.id,
       )
       DomainEvents.dispatchEventsForAggregate(owner.id)
+   }
+
+   async removeInvited(teamMember: Admin | Member): Promise<void> {
+      const memberIndex = this.db[TABLE].findIndex((item) =>
+         item.id.equals(teamMember.id),
+      )
+
+      if (memberIndex < 0) {
+         throw new Error()
+      }
+
+      this.db[TABLE].splice(memberIndex, 1)
    }
 }
