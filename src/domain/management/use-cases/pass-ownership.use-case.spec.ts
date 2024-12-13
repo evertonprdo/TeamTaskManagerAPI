@@ -1,15 +1,13 @@
 import { makeOwner } from '../tests/factories/make-owner'
 import { makeMember } from '../tests/factories/make-member'
 
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
-
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 
 import { Admin } from '../entities/admin'
 import { Owner } from '../entities/owner'
 
 import { PassOwnershipUseCase } from './pass-ownership.use-case'
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 
 let inMemoryDatabase: InMemoryDatabase
 let teamMembersRepository: InMemoryTeamMembersRepository
@@ -35,7 +33,7 @@ describe('Use case: Pass Ownership', () => {
 
       const result = await sut.execute({
          owner,
-         passToId: member.id.toString(),
+         passTo: member,
       })
 
       expect(result.isRight()).toBe(true)
@@ -47,17 +45,5 @@ describe('Use case: Pass Ownership', () => {
 
       expect(newOwner).toBeInstanceOf(Owner)
       expect(oldOwner).toBeInstanceOf(Admin)
-   })
-
-   it('should not be possible to pass the ownership to a member that not exist', async () => {
-      const owner = makeOwner()
-
-      const result = await sut.execute({
-         owner,
-         passToId: 'any-uuid',
-      })
-
-      expect(result.isLeft()).toBe(true)
-      expect(result.value).toBeInstanceOf(ResourceNotFoundError)
    })
 })

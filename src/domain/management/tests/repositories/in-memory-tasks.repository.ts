@@ -9,6 +9,8 @@ import { TeamMemberRole } from '../../entities/team-member'
 
 import { InMemoryDatabase } from './in-memory-database'
 import {
+   FindManyByTeamIdParams,
+   FindManyByTeamMemberIdParams,
    FindManyWithAssignedByTeamIdParams,
    TasksRepository,
 } from '../../repositories/tasks.repository'
@@ -18,10 +20,28 @@ const TABLE = 'tasks'
 export class InMemoryTasksRepository implements TasksRepository {
    constructor(private db: InMemoryDatabase) {}
 
-   async findManyByTeamId(id: string): Promise<Task[]> {
+   async findManyByTeamId({
+      teamId,
+      page,
+   }: FindManyByTeamIdParams): Promise<Task[]> {
       const tasks = this.db[TABLE].filter(
-         (item) => item.teamId.toString() === id,
+         (item) => item.teamId.toString() === teamId,
       )
+         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+         .slice((page - 1) * 20, page * 20)
+
+      return tasks
+   }
+
+   async findManyByTeamMemberId({
+      teamMemberId,
+      page,
+   }: FindManyByTeamMemberIdParams): Promise<Task[]> {
+      const tasks = this.db[TABLE].filter(
+         (item) => item.assignedToId?.toString() === teamMemberId,
+      )
+         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+         .slice((page - 1) * 20, page * 20)
 
       return tasks
    }
@@ -61,27 +81,6 @@ export class InMemoryTasksRepository implements TasksRepository {
       }
 
       return task
-   }
-
-   async findDetailsById(id: string): Promise<null | TaskDetails> {
-      const task = this.db[TABLE].find((item) => item.id.toString() === id)
-
-      if (!task) {
-         return null
-      }
-
-      return TaskDetails.create({
-         id: task.id,
-         title: task.title,
-         description: task.description,
-         status: task.status,
-         priority: task.priority,
-         teamId: task.teamId,
-         updatedAt: task.updatedAt,
-         createdAt: task.createdAt,
-         assignedTo: this.getTeamMemberWithName(task),
-         logs: [],
-      })
    }
 
    async create(task: Task): Promise<void> {

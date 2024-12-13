@@ -1,30 +1,43 @@
-import { Either, left, right } from '@/core/either'
+import { Either, right } from '@/core/either'
 
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
-
+import { Team } from '../entities/team'
 import { TeamDetails } from '../entities/value-objects/team-details'
-import { TeamsRepository } from '../repositories/teams.repository'
+
+import { TasksRepository } from '../repositories/tasks.repository'
+import { TeamMembersRepository } from '../repositories/team-members.repository'
 
 interface GetTeamDetailsUseCaseRequest {
-   teamId: string
+   team: Team
 }
 
-type GetTeamDetailsUseCaseResponse = Either<
-   ResourceNotFoundError,
-   { teamDetails: TeamDetails }
->
+type GetTeamDetailsUseCaseResponse = Either<null, { teamDetails: TeamDetails }>
 
 export class GetTeamDetailsUseCase {
-   constructor(private teamsRepository: TeamsRepository) {}
+   constructor(
+      private teamMembersRepository: TeamMembersRepository,
+      private tasksRepository: TasksRepository,
+   ) {}
 
    async execute({
-      teamId,
+      team,
    }: GetTeamDetailsUseCaseRequest): Promise<GetTeamDetailsUseCaseResponse> {
-      const teamDetails = await this.teamsRepository.findDetailsById(teamId)
+      const [teamMemberWithName, teamTasks] = await Promise.all([
+         this.teamMembersRepository.findManyWithNameByTeamId(
+            team.id.toString(),
+         ),
+         this.tasksRepository.findManyWithAssignedByTeamId({
+            teamId: team.id.toString(),
+            page: 1,
+         }),
+      ])
 
-      if (!teamDetails) {
-         return left(new ResourceNotFoundError())
-      }
+      const teamDetails = TeamDetails.create({
+         id: team.id,
+         teamName: team.name,
+         description: team.description,
+         tasks: teamTasks,
+         teamMembers: teamMemberWithName,
+      })
 
       return right({ teamDetails })
    }

@@ -2,11 +2,14 @@ import { Either, left, right } from '@/core/either'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 
-import { TeamMembersRepository } from '../repositories/team-members.repository'
+import { TeamMember, TeamMemberRole } from '../entities/team-member'
 import { TeamMemberDetails } from '../entities/value-objects/team-member-details'
 
+import { TasksRepository } from '../repositories/tasks.repository'
+import { UsersRepository } from '../repositories/users.repository'
+
 interface GetTeamMemberDetailsUseCaseRequest {
-   teamMemberId: string
+   teamMember: TeamMember
 }
 
 type GetTeamMemberDetailsUseCaseResponse = Either<
@@ -15,17 +18,37 @@ type GetTeamMemberDetailsUseCaseResponse = Either<
 >
 
 export class GetTeamMemberDetailsUseCase {
-   constructor(private teamMembersRepository: TeamMembersRepository) {}
+   constructor(
+      private tasksRepository: TasksRepository,
+      private usersRepository: UsersRepository,
+   ) {}
 
    async execute({
-      teamMemberId,
+      teamMember,
    }: GetTeamMemberDetailsUseCaseRequest): Promise<GetTeamMemberDetailsUseCaseResponse> {
-      const teamMemberDetails =
-         await this.teamMembersRepository.findDetailsById(teamMemberId)
+      const [user, teamMemberTasks] = await Promise.all([
+         this.usersRepository.findById(teamMember.userId.toString()),
+         this.tasksRepository.findManyByTeamMemberId({
+            teamMemberId: teamMember.id.toString(),
+            page: 1,
+         }),
+      ])
 
-      if (!teamMemberDetails) {
+      if (!user) {
          return left(new ResourceNotFoundError())
       }
+
+      const teamMemberDetails = TeamMemberDetails.create({
+         id: teamMember.id,
+         name: user.name,
+         email: user.email,
+         role: teamMember.constructor.name.toUpperCase() as TeamMemberRole,
+         status: teamMember.status,
+         userId: user.id,
+         teamId: teamMember.teamId,
+         tasks: teamMemberTasks,
+         createdAt: teamMember.createdAt,
+      })
 
       return right({ teamMemberDetails })
    }

@@ -1,6 +1,5 @@
 import { Owner } from '../entities/owner'
 import { TeamMember } from '../entities/team-member'
-import { TeamMemberDetails } from '../entities/value-objects/team-member-details'
 import { TeamMemberWithName } from '../entities/value-objects/team-member-with-name'
 
 export interface FindByUserIdAndTeamIdProps {
@@ -9,7 +8,7 @@ export interface FindByUserIdAndTeamIdProps {
 }
 
 export interface TeamMembersRepository {
-   findManyByTeamId(id: string, status?: boolean): Promise<TeamMember[]>
+   fetchUserIdsToNotifyOnTeamDelete(teamId: string): Promise<string[]>
 
    findManyWithNameByTeamId(
       id: string,
@@ -17,7 +16,6 @@ export interface TeamMembersRepository {
    ): Promise<TeamMemberWithName[]>
 
    findById(id: string): Promise<null | TeamMember>
-   findDetailsById(id: string): Promise<null | TeamMemberDetails>
    findWithNameById(id: string): Promise<null | TeamMemberWithName>
 
    findByUserIdAndTeamId(

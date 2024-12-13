@@ -1,40 +1,29 @@
-import { Either, left, right } from '@/core/either'
-import { UniqueEntityID } from '@/core/entities/unique-entity-id'
+import { Either, right } from '@/core/either'
 
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
+import { Team } from '../entities/team'
 
 import { TeamsRepository } from '../repositories/teams.repository'
-import { Owner } from '../entities/owner'
+import { TeamMembersRepository } from '../repositories/team-members.repository'
 
 interface RemoveTeamUseCaseRequest {
-   teamId: string
+   team: Team
 }
 
-type RemoveTeamUseCaseResponse = Either<ResourceNotFoundError, null>
+type RemoveTeamUseCaseResponse = Either<null, null>
 
 export class RemoveTeamUseCase {
-   constructor(private teamsRepository: TeamsRepository) {}
+   constructor(
+      private teamsRepository: TeamsRepository,
+      private teamMembersRepository: TeamMembersRepository,
+   ) {}
 
    async execute({
-      teamId,
+      team,
    }: RemoveTeamUseCaseRequest): Promise<RemoveTeamUseCaseResponse> {
-      const team = await this.teamsRepository.findWithMembersById(teamId)
-
-      if (!team) {
-         return left(new ResourceNotFoundError())
-      }
-
-      const userIds: UniqueEntityID[] = []
-
-      for (const member of team.members) {
-         if (member instanceof Owner) {
-            continue
-         }
-
-         if (member.status === 'ACTIVE') {
-            userIds.push(member.userId)
-         }
-      }
+      const userIds =
+         await this.teamMembersRepository.fetchUserIdsToNotifyOnTeamDelete(
+            team.id.toString(),
+         )
 
       team.setupToRemove(userIds)
       await this.teamsRepository.delete(team)

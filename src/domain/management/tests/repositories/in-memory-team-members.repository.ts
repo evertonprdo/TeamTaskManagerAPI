@@ -17,14 +17,6 @@ const TABLE = 'team_members'
 export class InMemoryTeamMembersRepository implements TeamMembersRepository {
    constructor(private db: InMemoryDatabase) {}
 
-   async findManyByTeamId(id: string) {
-      const teamMembers = this.db[TABLE].filter(
-         (item) => item.teamId.toString() === id,
-      )
-
-      return teamMembers
-   }
-
    async findManyWithNameByTeamId(id: string) {
       const teamMembers = this.db[TABLE].filter(
          (item) => item.teamId.toString() === id,
@@ -60,6 +52,15 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
       return teamMembersWithName
    }
 
+   async fetchUserIdsToNotifyOnTeamDelete(teamId: string): Promise<string[]> {
+      const teamMembers = this.db.team_members
+         .filter((item) => item.teamId.toString() === teamId)
+         .filter((item) => item.status === 'ACTIVE')
+         .filter((item) => !(item instanceof Owner))
+
+      return teamMembers.map((teamMember) => teamMember.userId.toString())
+   }
+
    async findById(id: string): Promise<null | TeamMember> {
       const teamMember = this.db[TABLE].find(
          (item) => item.id.toString() === id,
@@ -72,40 +73,33 @@ export class InMemoryTeamMembersRepository implements TeamMembersRepository {
       return teamMember
    }
 
-   findWithNameById(id: string): Promise<null | TeamMemberWithName> {
-      throw new Error('Method not implemented.')
-   }
-
-   async findDetailsById(id: string): Promise<null | TeamMemberDetails> {
-      const teamMember = this.db[TABLE].find(
+   async findWithNameById(id: string): Promise<null | TeamMemberWithName> {
+      const member = this.db.team_members.find(
          (item) => item.id.toString() === id,
       )
 
-      if (!teamMember) {
+      if (!member) {
          return null
       }
 
-      const user = this.db.users.find((item) =>
-         item.id.equals(teamMember.userId),
-      )
+      const user = this.db.users.find((item) => item.id.equals(member.userId))
 
       if (!user) {
          throw new Error()
       }
 
-      const role = teamMember.constructor.name.toUpperCase() as TeamMemberRole
-
-      return TeamMemberDetails.create({
-         id: teamMember.id,
+      const memberWithName = TeamMemberWithName.create({
+         id: member.id,
          name: user.name,
          email: user.email,
-         role,
-         status: teamMember.status,
-         teamId: teamMember.teamId,
-         userId: user.id,
-         tasks: [],
-         createdAt: teamMember.createdAt,
+         status: member.status,
+         role: member.constructor.name.toUpperCase() as TeamMemberRole,
+         teamId: member.teamId,
+         userId: member.userId,
+         createdAt: member.createdAt,
       })
+
+      return memberWithName
    }
 
    async findByUserIdAndTeamId({

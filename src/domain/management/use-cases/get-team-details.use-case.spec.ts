@@ -1,25 +1,31 @@
+import { makeTask } from '../tests/factories/make-task'
 import { makeTeam } from '../tests/factories/make-team'
 import { makeUser } from '../tests/factories/make-user'
 import { makeOwner } from '../tests/factories/make-owner'
 import { makeMember } from '../tests/factories/make-member'
 
 import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTeamsRepository } from '../tests/repositories/in-memory-teams.repository'
+import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
+import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 import { GetTeamDetailsUseCase } from './get-team-details.use-case'
 
 let inMemoryDatabase: InMemoryDatabase
-let teamsRepository: InMemoryTeamsRepository
+let tasksRepository: InMemoryTasksRepository
+let teamMembersRepository: InMemoryTeamMembersRepository
 
 let sut: GetTeamDetailsUseCase
 
 describe('Use case: Get team details', () => {
    beforeEach(() => {
       inMemoryDatabase = new InMemoryDatabase()
-      teamsRepository = new InMemoryTeamsRepository(inMemoryDatabase)
+      tasksRepository = new InMemoryTasksRepository(inMemoryDatabase)
 
-      sut = new GetTeamDetailsUseCase(teamsRepository)
+      teamMembersRepository = new InMemoryTeamMembersRepository(
+         inMemoryDatabase,
+      )
+
+      sut = new GetTeamDetailsUseCase(teamMembersRepository, tasksRepository)
    })
 
    it('should get team details by id', async () => {
@@ -38,10 +44,14 @@ describe('Use case: Get team details', () => {
       const members = users.map((user) =>
          makeMember({ userId: user.id, teamId: team.id }),
       )
-
       inMemoryDatabase.team_members.push(...members)
 
-      const result = await sut.execute({ teamId: team.id.toString() })
+      const tasks = Array.from({ length: 23 }, () =>
+         makeTask({ teamId: team.id }),
+      )
+      inMemoryDatabase.tasks.push(...tasks)
+
+      const result = await sut.execute({ team: team })
 
       expect(result.isRight()).toBe(true)
 
@@ -62,12 +72,7 @@ describe('Use case: Get team details', () => {
          expect.objectContaining({ id: members[1].id, userId: users[1].id }),
          expect.objectContaining({ id: members[2].id, userId: users[2].id }),
       ])
-   })
 
-   it('should not be possible to get details from a team that does not exists', async () => {
-      const result = await sut.execute({ teamId: 'any-uuid' })
-
-      expect(result.isLeft()).toBe(true)
-      expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(result.value.teamDetails.tasks).toHaveLength(20)
    })
 })

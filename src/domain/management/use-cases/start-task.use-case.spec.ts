@@ -7,7 +7,6 @@ import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.r
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
 import { NotAllowedError } from '@/core/errors/not-allowed.error'
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 import { TaskAlreadyInProgressError } from './errors/task-already-in-progress.error'
 
 import { StartTaskUseCase } from './start-task.use-case'
@@ -36,7 +35,7 @@ describe('Use case: Start Task', () => {
       inMemoryDatabase.tasks.push(task)
 
       const result = await sut.execute({
-         taskId: task.id.toString(),
+         task: task,
          updatedBy: member,
       })
 
@@ -61,7 +60,7 @@ describe('Use case: Start Task', () => {
       inMemoryDatabase.tasks.push(task)
 
       const result = await sut.execute({
-         taskId: task.id.toString(),
+         task: task,
          updatedBy: member,
       })
 
@@ -80,23 +79,11 @@ describe('Use case: Start Task', () => {
       inMemoryDatabase.tasks.push(task)
 
       const result = await sut.execute({
-         taskId: task.id.toString(),
+         task: task,
          updatedBy: member,
       })
 
       expect(result.isLeft()).toBe(true)
       expect(result.value).toBeInstanceOf(NotAllowedError)
-   })
-
-   it('should not be possible to start a task that does not exists', async () => {
-      const member = makeMember()
-
-      const result = await sut.execute({
-         taskId: 'any-uuid',
-         updatedBy: member,
-      })
-
-      expect(result.isLeft()).toBe(true)
-      expect(result.value).toBeInstanceOf(ResourceNotFoundError)
    })
 })

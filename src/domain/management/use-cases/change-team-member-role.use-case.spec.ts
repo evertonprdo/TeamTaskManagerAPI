@@ -1,6 +1,6 @@
 import { makeAdmin } from '../tests/factories/make-admin'
-import { makeMember } from '../tests/factories/make-member'
 import { makeOwner } from '../tests/factories/make-owner'
+import { makeMember } from '../tests/factories/make-member'
 
 import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
@@ -37,7 +37,7 @@ describe('Use case: Change team member role', () => {
 
       const result = await sut.execute({
          newRole: 'ADMIN',
-         teamMemberId: member.id.toString(),
+         teamMember: member,
       })
 
       expect(result.isRight()).toBe(true)
@@ -57,7 +57,7 @@ describe('Use case: Change team member role', () => {
 
       const result = await sut.execute({
          newRole: 'MEMBER',
-         teamMemberId: member.id.toString(),
+         teamMember: member,
       })
 
       expect(result.isRight()).toBe(true)
@@ -75,7 +75,7 @@ describe('Use case: Change team member role', () => {
 
       const result = await sut.execute({
          newRole: 'MEMBER',
-         teamMemberId: owner.id.toString(),
+         teamMember: owner as any,
       })
 
       expect(result.isLeft()).toBe(true)
@@ -90,7 +90,7 @@ describe('Use case: Change team member role', () => {
 
       const result = await sut.execute({
          newRole: 'ADMIN',
-         teamMemberId: member.id.toString(),
+         teamMember: member,
       })
 
       expect(result.isLeft()).toBe(true)
@@ -105,7 +105,7 @@ describe('Use case: Change team member role', () => {
 
       const result = await sut.execute({
          newRole: 'MEMBER',
-         teamMemberId: member.id.toString(),
+         teamMember: member,
       })
 
       expect(result.isLeft()).toBe(true)

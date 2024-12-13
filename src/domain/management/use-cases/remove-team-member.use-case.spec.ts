@@ -2,13 +2,13 @@ import { makeAdmin } from '../tests/factories/make-admin'
 import { makeMember } from '../tests/factories/make-member'
 import { makeOwner } from '../tests/factories/make-owner'
 
+import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
 
 import { ForbiddenError } from '@/core/errors/forbidden.error'
 import { NotAllowedError } from '@/core/errors/not-allowed.error'
 
 import { RemoveTeamMemberUseCase } from './remove-team-member.use-case'
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 
 let inMemoryDatabase: InMemoryDatabase
 let teamMembersRepository: InMemoryTeamMembersRepository
@@ -32,7 +32,7 @@ describe('Use case: Remove team member', () => {
       inMemoryDatabase.team_members.push(teamMember)
 
       const result = await sut.execute({
-         teamMemberId: teamMember.id.toString(),
+         teamMember: teamMember,
          removingBy: owner,
       })
 
@@ -48,7 +48,7 @@ describe('Use case: Remove team member', () => {
       inMemoryDatabase.team_members.push(admin)
 
       const result = await sut.execute({
-         teamMemberId: admin.id.toString(),
+         teamMember: admin,
          removingBy: owner,
       })
 
@@ -63,7 +63,7 @@ describe('Use case: Remove team member', () => {
       inMemoryDatabase.team_members.push(owner)
 
       const result = await sut.execute({
-         teamMemberId: owner.id.toString(),
+         teamMember: owner as any,
          removingBy: owner,
       })
 
@@ -77,7 +77,7 @@ describe('Use case: Remove team member', () => {
       inMemoryDatabase.team_members.push(teamMember)
 
       const result = await sut.execute({
-         teamMemberId: teamMember.id.toString(),
+         teamMember: teamMember,
          removingBy: admin,
       })
 
@@ -92,7 +92,7 @@ describe('Use case: Remove team member', () => {
       inMemoryDatabase.team_members.push(admin)
 
       const result = await sut.execute({
-         teamMemberId: admin.id.toString(),
+         teamMember: admin,
          removingBy: admin,
       })
 
@@ -108,7 +108,7 @@ describe('Use case: Remove team member', () => {
       inMemoryDatabase.team_members.push(anotherAdmin)
 
       const result = await sut.execute({
-         teamMemberId: anotherAdmin.id.toString(),
+         teamMember: anotherAdmin,
          removingBy: admin,
       })
 
@@ -121,7 +121,7 @@ describe('Use case: Remove team member', () => {
       inMemoryDatabase.team_members.push(member)
 
       const result = await sut.execute({
-         teamMemberId: member.id.toString(),
+         teamMember: member,
          removingBy: member,
       })
 
@@ -137,7 +137,7 @@ describe('Use case: Remove team member', () => {
       inMemoryDatabase.team_members.push(admin)
 
       const result = await sut.execute({
-         teamMemberId: admin.id.toString(),
+         teamMember: admin,
          removingBy: member,
       })
 
@@ -151,7 +151,7 @@ describe('Use case: Remove team member', () => {
       inMemoryDatabase.team_members.push(anotherMember)
 
       const result = await sut.execute({
-         teamMemberId: anotherMember.id.toString(),
+         teamMember: anotherMember,
          removingBy: member,
       })
 

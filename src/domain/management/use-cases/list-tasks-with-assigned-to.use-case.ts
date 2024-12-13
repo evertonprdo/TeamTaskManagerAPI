@@ -3,23 +3,23 @@ import { Either, right } from '@/core/either'
 import { TasksRepository } from '../repositories/tasks.repository'
 import { TaskWithAssignedTo } from '../entities/value-objects/task-with-assigned-to'
 
-interface ListTeamTasksUseCaseRequest {
+interface ListTasksWithAssignedToUseCaseRequest {
    teamId: string
    page: number
 }
 
-type ListTeamTasksUseCaseResponse = Either<
+type ListTasksWithAssignedToUseCaseResponse = Either<
    null,
    { tasks: TaskWithAssignedTo[] }
 >
 
-export class ListTeamTasksUseCase {
+export class ListTasksWithAssignedToUseCase {
    constructor(private tasksRepository: TasksRepository) {}
 
    async execute({
       teamId,
       page,
-   }: ListTeamTasksUseCaseRequest): Promise<ListTeamTasksUseCaseResponse> {
+   }: ListTasksWithAssignedToUseCaseRequest): Promise<ListTasksWithAssignedToUseCaseResponse> {
       const tasks = await this.tasksRepository.findManyWithAssignedByTeamId({
          teamId,
          page,

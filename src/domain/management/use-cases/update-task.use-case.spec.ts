@@ -30,7 +30,7 @@ describe('Use case: Update Task', () => {
          title: 'new-title',
          description: 'new-description',
          priority: 'MEDIUM',
-         taskId: task.id.toString(),
+         task: task,
       })
 
       expect(result.isRight()).toBe(true)

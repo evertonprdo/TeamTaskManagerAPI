@@ -42,7 +42,7 @@ export class Team extends AggregateRoot<TeamProps> {
       this.props.updatedAt = new Date()
    }
 
-   setupToRemove(userIds: UniqueEntityID[]) {
+   setupToRemove(userIds: string[]) {
       this.addDomainEvent(new TeamRemovedEvent(this, userIds))
    }
 

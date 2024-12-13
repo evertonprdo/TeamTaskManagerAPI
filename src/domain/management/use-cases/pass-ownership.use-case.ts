@@ -1,47 +1,37 @@
-import { Either, left, right } from '@/core/either'
-
-import { ForbiddenError } from '@/core/errors/forbidden.error'
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
+import { Either, right } from '@/core/either'
 
 import { Owner } from '../entities/owner'
+import { Admin } from '../entities/admin'
+import { Member } from '../entities/member'
+
 import { TeamMembersRepository } from '../repositories/team-members.repository'
 
 interface PassOwnershipUseCaseRequest {
    owner: Owner
-   passToId: string
+   passTo: Admin | Member
 }
 
-type PassOwnershipUseCaseResponse = Either<ResourceNotFoundError, null>
+type PassOwnershipUseCaseResponse = Either<null, null>
 
 export class PassOwnershipUseCase {
    constructor(private teamMembersRepository: TeamMembersRepository) {}
 
    async execute({
       owner,
-      passToId,
+      passTo,
    }: PassOwnershipUseCaseRequest): Promise<PassOwnershipUseCaseResponse> {
-      let teamMember = await this.teamMembersRepository.findById(passToId)
-
-      if (!teamMember) {
-         return left(new ResourceNotFoundError())
-      }
-
-      if (teamMember.status !== 'ACTIVE') {
-         return left(new ForbiddenError())
-      }
-
-      owner.remove(teamMember)
+      owner.remove(passTo)
       await this.teamMembersRepository.removeOwner(owner)
 
-      teamMember = Owner.create(
+      const teamMember = Owner.create(
          {
-            teamId: teamMember.teamId,
-            userId: teamMember.userId,
-            createdAt: teamMember.createdAt,
-            status: teamMember.status,
-            updatedAt: teamMember.updatedAt,
+            teamId: passTo.teamId,
+            userId: passTo.userId,
+            createdAt: passTo.createdAt,
+            status: passTo.status,
+            updatedAt: passTo.updatedAt,
          },
-         teamMember.id,
+         passTo.id,
       )
 
       await this.teamMembersRepository.save(teamMember)

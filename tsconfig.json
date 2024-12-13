@@ -7,6 +7,21 @@
       "lib": ["es2023"],
       "module": "node16",
       "target": "es2022",
+
+      "declaration": true,
+      "removeComments": true,
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "allowSyntheticDefaultImports": true,
+      "sourceMap": true,
+      "outDir": "./dist",
+      "baseUrl": "./",
+      "incremental": true,
+      "strictNullChecks": true,
+      "noImplicitAny": false,
+      "strictBindCallApply": false,
+      "noFallthroughCasesInSwitch": false,
+
       "paths": {
          "@/*": ["./src/*"],
          "@user/*": ["./src/domain/user/*"],

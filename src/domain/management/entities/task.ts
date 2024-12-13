@@ -4,6 +4,7 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { TaskReassignedEvent } from '../events/task-reassigned.event'
 import { TaskAction, TaskEvent } from '../events/task.event'
 import { TaskStatusUpdatedEvent } from '../events/task-status-updated.event'
+import { TaskCreatedEvent } from '../events/task-created.event'
 
 import { TeamMember } from './team-member'
 import { Admin } from './admin'
@@ -148,7 +149,7 @@ export class Task extends AggregateRoot<TaskProps> {
          task.assign(props.assignedToId)
       }
 
-      task.addDomainEvent(new TaskEvent(task, TaskAction.CREATED))
+      task.addDomainEvent(new TaskCreatedEvent(task, secondProp))
       return task
    }
 }

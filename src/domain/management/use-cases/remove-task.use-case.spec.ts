@@ -22,7 +22,7 @@ describe('Use case: Remove Task', () => {
       const task = makeTask()
       inMemoryDatabase.tasks.push(task)
 
-      const result = await sut.execute({ taskId: task.id.toString() })
+      const result = await sut.execute({ task: task })
 
       expect(result.isRight()).toBe(true)
       expect(inMemoryDatabase.tasks).toHaveLength(0)

@@ -12,7 +12,7 @@ import { TeamMember } from '../entities/team-member'
 import { TeamMembersRepository } from '../repositories/team-members.repository'
 
 interface RemoveTeamMemberUseCaseRequest {
-   teamMemberId: string
+   teamMember: Admin | Member
    removingBy: TeamMember
 }
 
@@ -22,58 +22,38 @@ type RemoveTeamMemberUseCaseResponse = Either<
 >
 
 export class RemoveTeamMemberUseCase {
+   private allowedRoles = {
+      ADMIN: [Owner],
+      MEMBER: [Owner, Admin],
+   }
+
    constructor(private teamMembersRepository: TeamMembersRepository) {}
 
    async execute({
-      teamMemberId,
+      teamMember,
       removingBy,
    }: RemoveTeamMemberUseCaseRequest): Promise<RemoveTeamMemberUseCaseResponse> {
-      const teamMember = await this.teamMembersRepository.findById(teamMemberId)
-
-      if (!teamMember) {
-         return left(new ResourceNotFoundError())
+      if (teamMember instanceof Owner) {
+         return left(new ForbiddenError())
       }
 
-      const removeError = this.getRemoveError(teamMember, removingBy)
-      if (removeError) {
-         return left(removeError)
+      const removedRole = teamMember.constructor.name.toUpperCase() as
+         | 'ADMIN'
+         | 'MEMBER'
+
+      const isSelfQuit = teamMember.id.equals(removingBy.id)
+
+      const isAllowedToRemove = this.allowedRoles[removedRole].some(
+         (role) => removingBy instanceof role,
+      )
+
+      if (!isSelfQuit && !isAllowedToRemove) {
+         return left(new NotAllowedError())
       }
 
       teamMember.remove(removingBy)
       await this.teamMembersRepository.save(teamMember)
 
       return right({ teamMember })
-   }
-
-   private getRemoveError(teamMember: TeamMember, removingBy: TeamMember) {
-      const isQuitting = teamMember.id.equals(removingBy.id)
-
-      switch (teamMember.constructor) {
-         case Owner:
-            return new ForbiddenError()
-
-         case Admin:
-            if (isQuitting) {
-               break
-            }
-            if (removingBy instanceof Owner) {
-               break
-            }
-
-            return new NotAllowedError()
-
-         case Member:
-            if (isQuitting) {
-               break
-            }
-            if (removingBy instanceof Admin || removingBy instanceof Owner) {
-               break
-            }
-
-            return new NotAllowedError()
-
-         default:
-            throw new Error()
-      }
    }
 }

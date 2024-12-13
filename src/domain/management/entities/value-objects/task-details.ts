@@ -1,8 +1,9 @@
+import { ValueObject } from '@/core/entities/value-object'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
+import { TaskLog } from '../task-log'
 import { TaskPriority, TaskStatus } from '../task'
 import { TeamMemberWithName } from './team-member-with-name'
-import { ValueObject } from '@/core/entities/value-object'
 
 export interface TaskDetailsProps {
    id: UniqueEntityID
@@ -12,9 +13,9 @@ export interface TaskDetailsProps {
    status: TaskStatus
    priority: TaskPriority
 
-   assignedTo?: TeamMemberWithName
+   assignedTo?: TeamMemberWithName | null
    teamId: UniqueEntityID
-   logs: []
+   logs: TaskLog[]
 
    createdAt: Date
    updatedAt?: Date | null

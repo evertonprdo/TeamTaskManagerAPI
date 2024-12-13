@@ -5,11 +5,11 @@ import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
 
 import { NotAllowedError } from '@/core/errors/not-allowed.error'
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 import { TaskAlreadyCompletedError } from './errors/task-already-completed.error'
 
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { CompleteTaskUseCase } from './complete-task.use-case'
+import { NotMemberAssignedError } from './errors/not-member-assigned.error'
 
 let inMemoryDatabase: InMemoryDatabase
 let tasksRepository: InMemoryTasksRepository
@@ -26,7 +26,6 @@ describe('Use case: Complete task', () => {
 
    it('should complete a task', async () => {
       const member = makeMember()
-      inMemoryDatabase.team_members.push(member)
 
       const task = makeTask({
          assignedToId: member.id,
@@ -36,7 +35,7 @@ describe('Use case: Complete task', () => {
       inMemoryDatabase.tasks.push(task)
 
       const result = await sut.execute({
-         taskId: task.id.toString(),
+         task: task,
          updatedBy: member,
       })
 
@@ -51,7 +50,6 @@ describe('Use case: Complete task', () => {
 
    it('should not be possible to complete a task twice', async () => {
       const member = makeMember()
-      inMemoryDatabase.team_members.push(member)
 
       const task = makeTask({
          assignedToId: member.id,
@@ -61,7 +59,7 @@ describe('Use case: Complete task', () => {
       inMemoryDatabase.tasks.push(task)
 
       const result = await sut.execute({
-         taskId: task.id.toString(),
+         task: task,
          updatedBy: member,
       })
 
@@ -80,23 +78,11 @@ describe('Use case: Complete task', () => {
       inMemoryDatabase.tasks.push(task)
 
       const result = await sut.execute({
-         taskId: task.id.toString(),
+         task: task,
          updatedBy: member,
       })
 
       expect(result.isLeft()).toBe(true)
-      expect(result.value).toBeInstanceOf(NotAllowedError)
-   })
-
-   it('should not be possible to complete a task that does not exists', async () => {
-      const member = makeMember()
-
-      const result = await sut.execute({
-         taskId: 'any-uuid',
-         updatedBy: member,
-      })
-
-      expect(result.isLeft()).toBe(true)
-      expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+      expect(result.value).toBeInstanceOf(NotMemberAssignedError)
    })
 })

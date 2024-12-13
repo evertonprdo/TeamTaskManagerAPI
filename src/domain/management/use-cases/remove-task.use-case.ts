@@ -1,10 +1,12 @@
-import { Either, left, right } from '@/core/either'
+import { Either, right } from '@/core/either'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
+
+import { Task } from '../entities/task'
 import { TasksRepository } from '../repositories/tasks.repository'
 
 interface RemoveTaskUseCaseRequest {
-   taskId: string
+   task: Task
 }
 
 type RemoveTaskUseCaseResponse = Either<ResourceNotFoundError, null>
@@ -13,14 +15,8 @@ export class RemoveTaskUseCase {
    constructor(private tasksRepository: TasksRepository) {}
 
    async execute({
-      taskId,
+      task,
    }: RemoveTaskUseCaseRequest): Promise<RemoveTaskUseCaseResponse> {
-      const task = await this.tasksRepository.findById(taskId)
-
-      if (!task) {
-         return left(new ResourceNotFoundError())
-      }
-
       this.tasksRepository.delete(task)
 
       return right(null)

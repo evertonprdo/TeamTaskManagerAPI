@@ -1,34 +1,28 @@
-import { Either, left, right } from '@/core/either'
+import { Either, right } from '@/core/either'
 
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
-
-import { TeamsRepository } from '../repositories/teams.repository'
 import { Team } from '../entities/team'
+import { TeamsRepository } from '../repositories/teams.repository'
 
 interface UpdateTeamUseCaseRequest {
-   teamId: string
+   team: Team
    name: string
    description: string
 }
 
-type UpdateTeamUseCaseResponse = Either<ResourceNotFoundError, { team: Team }>
+type UpdateTeamUseCaseResponse = Either<null, { team: Team }>
 
 export class UpdateTeamUseCase {
    constructor(private teamsRepository: TeamsRepository) {}
 
    async execute({
-      teamId,
+      team,
       name,
       description,
    }: UpdateTeamUseCaseRequest): Promise<UpdateTeamUseCaseResponse> {
-      const team = await this.teamsRepository.findById(teamId)
-
-      if (!team) {
-         return left(new ResourceNotFoundError())
-      }
-
       team.name = name
       team.description = description
+
+      await this.teamsRepository.save(team)
 
       return right({ team })
    }

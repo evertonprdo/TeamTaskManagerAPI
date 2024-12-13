@@ -1,24 +1,26 @@
 import { makeMember } from '../tests/factories/make-member'
+import { makeTask } from '../tests/factories/make-task'
 import { makeUser } from '../tests/factories/make-user'
 
 import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
+import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
+import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
 
 import { GetTeamMemberDetailsUseCase } from './get-team-member-details.use-case'
 
 let inMemoryDatabase: InMemoryDatabase
-let teamMembersRepository: InMemoryTeamMembersRepository
+let usersRepository: InMemoryUsersRepository
+let tasksRepository: InMemoryTasksRepository
 
 let sut: GetTeamMemberDetailsUseCase
 
 describe('Use case: Get Team Member Details', () => {
    beforeEach(() => {
       inMemoryDatabase = new InMemoryDatabase()
-      teamMembersRepository = new InMemoryTeamMembersRepository(
-         inMemoryDatabase,
-      )
+      usersRepository = new InMemoryUsersRepository(inMemoryDatabase)
+      tasksRepository = new InMemoryTasksRepository(inMemoryDatabase)
 
-      sut = new GetTeamMemberDetailsUseCase(teamMembersRepository)
+      sut = new GetTeamMemberDetailsUseCase(tasksRepository, usersRepository)
    })
 
    it('should get details about a team member', async () => {
@@ -28,8 +30,17 @@ describe('Use case: Get Team Member Details', () => {
       const teamMember = makeMember({ userId: user.id })
       inMemoryDatabase.team_members.push(teamMember)
 
+      const tasks = Array.from({ length: 23 }, () =>
+         makeTask({
+            assignedToId: teamMember.id,
+            teamId: teamMember.teamId,
+            status: 'PENDING',
+         }),
+      )
+      inMemoryDatabase.tasks.push(...tasks)
+
       const result = await sut.execute({
-         teamMemberId: teamMember.id.toString(),
+         teamMember: teamMember,
       })
 
       expect(result.isRight()).toBe(true)
@@ -42,6 +53,10 @@ describe('Use case: Get Team Member Details', () => {
          role: 'MEMBER',
          id: teamMember.id,
          userId: user.id,
+         name: user.name,
+         email: user.email,
       })
+
+      expect(result.value.teamMemberDetails.tasks).toHaveLength(20)
    })
 })

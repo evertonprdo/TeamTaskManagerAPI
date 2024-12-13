@@ -7,6 +7,7 @@ import { TasksRepository } from '../../repositories/tasks.repository'
 
 interface GetTaskUseCaseRequest {
    taskId: string
+   isActive?: boolean
 }
 
 type GetTaskUseCaseResponse = Either<ResourceNotFoundError, { task: Task }>

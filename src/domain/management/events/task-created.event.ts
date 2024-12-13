@@ -2,22 +2,17 @@ import { DomainEvent } from '@/core/events/domain-event'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
 import { Task } from '../entities/task'
+import { TeamMember } from '../entities/team-member'
 
-export enum TaskAction {
-   ASSIGN,
-   DETAILS_UPDATED,
-   REMOVED,
-}
-
-export class TaskEvent implements DomainEvent {
+export class TaskCreatedEvent implements DomainEvent {
    public occurredAt: Date
    public task: Task
-   public action: TaskAction
+   public changedBy: TeamMember
 
-   constructor(task: Task, action: TaskAction) {
+   constructor(task: Task, changedBy: TeamMember) {
       this.occurredAt = new Date()
       this.task = task
-      this.action = action
+      this.changedBy = changedBy
    }
 
    getAggregateId(): UniqueEntityID {

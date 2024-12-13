@@ -1,40 +1,31 @@
 import { Either, left, right } from '@/core/either'
 
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
+import { ForbiddenError } from '@/core/errors/forbidden.error'
 
 import { Task } from '../entities/task'
-import { UniqueEntityID } from '@/core/entities/unique-entity-id'
+import { TeamMember } from '../entities/team-member'
 
 import { TasksRepository } from '../repositories/tasks.repository'
-import { TeamMembersRepository } from '../repositories/team-members.repository'
 
 interface AssignTaskUseCaseRequest {
-   teamMemberId: string
-   taskId: string
+   teamMember: TeamMember
+   task: Task
 }
 
-type AssignTaskUseCaseResponse = Either<ResourceNotFoundError, { task: Task }>
+type AssignTaskUseCaseResponse = Either<ForbiddenError, { task: Task }>
 
 export class AssignTaskUseCase {
-   constructor(
-      private tasksRepository: TasksRepository,
-      private teamMembersRepository: TeamMembersRepository,
-   ) {}
+   constructor(private tasksRepository: TasksRepository) {}
 
    async execute({
-      taskId,
-      teamMemberId,
+      task,
+      teamMember,
    }: AssignTaskUseCaseRequest): Promise<AssignTaskUseCaseResponse> {
-      const [task, teamMember] = await Promise.all([
-         this.tasksRepository.findById(taskId),
-         this.teamMembersRepository.findById(teamMemberId),
-      ])
-
-      if (!task || !teamMember) {
-         return left(new ResourceNotFoundError())
+      if (teamMember.status !== 'ACTIVE') {
+         return left(new ForbiddenError())
       }
 
-      task.assignedToId instanceof UniqueEntityID
+      task.assignedToId
          ? task.reassign(teamMember.id)
          : task.assign(teamMember.id)
 

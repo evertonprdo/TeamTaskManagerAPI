@@ -8,19 +8,19 @@ import { makeMember } from '../tests/factories/make-member'
 import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
 import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
 
-import { ListTeamTasksUseCase } from './list-team-tasks.use-case'
+import { ListTasksWithAssignedToUseCase } from './list-tasks-with-assigned-to.use-case'
 
 let inMemoryDatabase: InMemoryDatabase
 let tasksRepository: InMemoryTasksRepository
 
-let sut: ListTeamTasksUseCase
+let sut: ListTasksWithAssignedToUseCase
 
 describe('Use case: List team tasks', () => {
    beforeEach(() => {
       inMemoryDatabase = new InMemoryDatabase()
       tasksRepository = new InMemoryTasksRepository(inMemoryDatabase)
 
-      sut = new ListTeamTasksUseCase(tasksRepository)
+      sut = new ListTasksWithAssignedToUseCase(tasksRepository)
    })
 
    it('should list a team tasks', async () => {

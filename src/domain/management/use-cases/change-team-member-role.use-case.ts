@@ -1,39 +1,38 @@
 import { Either, left, right } from '@/core/either'
 
 import { ForbiddenError } from '@/core/errors/forbidden.error'
-import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 import { TeamMemberAlreadyInRoleError } from './errors/team-member-already-in-role.error'
 
 import { Admin } from '../entities/admin'
 import { Owner } from '../entities/owner'
 import { Member } from '../entities/member'
+
 import { TeamMembersRepository } from '../repositories/team-members.repository'
 
 type Role = 'ADMIN' | 'MEMBER'
 
 interface ChangeTeamMemberRoleRequest {
    newRole: Role
-   teamMemberId: string
+   teamMember: Admin | Member
 }
 
 type ChangeTeamMemberRoleResponse = Either<
-   ResourceNotFoundError | TeamMemberAlreadyInRoleError | ForbiddenError,
+   TeamMemberAlreadyInRoleError | ForbiddenError,
    { teamMember: Admin | Member }
 >
 
 export class ChangeTeamMemberRole {
+   private roleMapper = {
+      ADMIN: Admin,
+      MEMBER: Member,
+   }
+
    constructor(private teamMembersRepository: TeamMembersRepository) {}
 
    async execute({
       newRole,
-      teamMemberId,
+      teamMember,
    }: ChangeTeamMemberRoleRequest): Promise<ChangeTeamMemberRoleResponse> {
-      const teamMember = await this.teamMembersRepository.findById(teamMemberId)
-
-      if (!teamMember) {
-         return left(new ResourceNotFoundError())
-      }
-
       if (teamMember.status !== 'ACTIVE') {
          return left(new ForbiddenError())
       }
@@ -46,28 +45,16 @@ export class ChangeTeamMemberRole {
          return left(new TeamMemberAlreadyInRoleError(newRole))
       }
 
-      const teamMemberProps = {
-         teamId: teamMember.teamId,
-         userId: teamMember.userId,
-         createdAt: teamMember.createdAt,
-         status: teamMember.status,
-         updatedAt: teamMember.updatedAt,
-      }
-
-      let updatedTeamMember: Admin | Member
-
-      switch (newRole) {
-         case 'ADMIN':
-            updatedTeamMember = Admin.create(teamMemberProps, teamMember.id)
-            break
-
-         case 'MEMBER':
-            updatedTeamMember = Member.create(teamMemberProps, teamMember.id)
-            break
-
-         default:
-            throw new Error()
-      }
+      const updatedTeamMember = this.roleMapper[newRole].create(
+         {
+            teamId: teamMember.teamId,
+            userId: teamMember.userId,
+            createdAt: teamMember.createdAt,
+            status: teamMember.status,
+            updatedAt: teamMember.updatedAt,
+         },
+         teamMember.id,
+      )
 
       updatedTeamMember.setupUpdateRole()
       await this.teamMembersRepository.save(updatedTeamMember)
