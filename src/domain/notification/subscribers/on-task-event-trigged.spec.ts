@@ -1,12 +1,9 @@
 import { waitFor } from '@/core/tests/utils/wait-for'
 
-import { Member } from '@management/entities/member'
 import { makeTeam } from '@management/tests/factories/make-team'
-import { makeUser } from '@management/tests/factories/make-user'
 import { makeOwner } from '@management/tests/factories/make-owner'
 
 import { InMemoryDatabase } from '@management/tests/repositories/in-memory-database'
-import { InMemoryUsersRepository } from '@management/tests/repositories/in-memory-users.repository'
 import { InMemoryTeamsRepository } from '@management/tests/repositories/in-memory-teams.repository'
 import { InMemoryTeamMembersRepository } from '@management/tests/repositories/in-memory-team-members.repository'
 
@@ -18,12 +15,15 @@ import {
    SendNotificationUseCaseResponse,
 } from '../use-cases/send-notification.use-case'
 
-import { OnTeamMemberCreated } from './on-team-member-created.event'
+import { OnTaskEventTriggered } from './on-task-event-trigged'
+
+import { makeTask } from '@/domain/management/tests/factories/make-task'
+import { InMemoryTasksRepository } from '@/domain/management/tests/repositories/in-memory-tasks.repository'
 
 let inMemoryDatabase: InMemoryDatabase
 
 let teamMembersRepository: InMemoryTeamMembersRepository
-let usersRepository: InMemoryUsersRepository
+let tasksRepository: InMemoryTasksRepository
 let teamsRepository: InMemoryTeamsRepository
 
 let notificationsRepository: InMemoryNotificationsRepository
@@ -34,7 +34,7 @@ let sendNotificationExecuteSpy: jest.SpyInstance<
    [SendNotificationUseCaseRequest]
 >
 
-describe('Subscriber: On Team Member Created', () => {
+describe('Subscriber: On Task Event Trigged', () => {
    beforeEach(() => {
       inMemoryDatabase = new InMemoryDatabase()
 
@@ -42,7 +42,7 @@ describe('Subscriber: On Team Member Created', () => {
          inMemoryDatabase,
       )
 
-      usersRepository = new InMemoryUsersRepository(inMemoryDatabase)
+      tasksRepository = new InMemoryTasksRepository(inMemoryDatabase)
       teamsRepository = new InMemoryTeamsRepository(inMemoryDatabase)
 
       notificationsRepository = new InMemoryNotificationsRepository()
@@ -56,34 +56,30 @@ describe('Subscriber: On Team Member Created', () => {
          'execute',
       )
 
-      new OnTeamMemberCreated(
-         sendNotificationUseCase,
-         usersRepository,
+      new OnTaskEventTriggered(
          teamsRepository,
+         teamMembersRepository,
+         sendNotificationUseCase,
       )
    })
 
-   it('should send a invitation notification on team member created', async () => {
+   it('should send a notification when a task has been assigned', async () => {
       const team = makeTeam()
-      const user = makeUser()
       const owner = makeOwner({ teamId: team.id })
 
       inMemoryDatabase.teams.push(team)
-      inMemoryDatabase.users.push(user)
       inMemoryDatabase.team_members.push(owner)
 
-      const member = Member.create(
-         {
-            teamId: owner.teamId,
-            userId: user.id,
-         },
-         owner,
-      )
+      const task = makeTask({ teamId: team.id })
+      inMemoryDatabase.tasks.push(task)
 
-      teamMembersRepository.create(member)
+      task.assign(owner.id)
+      tasksRepository.save(task)
 
       await waitFor(() => {
          expect(sendNotificationExecuteSpy).toHaveBeenCalled()
       })
    })
+
+   // it should be decomposed into unique events
 })

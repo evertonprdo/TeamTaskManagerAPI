@@ -1,17 +1,17 @@
 import { InMemoryNotificationsRepository } from '../tests/repositories/in-memory-notifications.repository'
 
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
-import { SendManyNotifications } from './send-many-notifications.use-case'
+import { SendManyNotificationsUseCase } from './send-many-notifications.use-case'
 
 let notificationsRepository: InMemoryNotificationsRepository
 
-let sut: SendManyNotifications
+let sut: SendManyNotificationsUseCase
 
 describe('Use case: Send Team MembersNotification', () => {
    beforeEach(() => {
       notificationsRepository = new InMemoryNotificationsRepository()
 
-      sut = new SendManyNotifications(notificationsRepository)
+      sut = new SendManyNotificationsUseCase(notificationsRepository)
    })
 
    it('should send the same message to all users', async () => {

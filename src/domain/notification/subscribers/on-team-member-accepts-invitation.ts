@@ -1,30 +1,54 @@
+import { DomainEvents } from '@/core/events/domain-events'
 import { EventHandler } from '@/core/events/event-handler'
 
-import { TeamMemberAcceptedInvitationEvent } from '@/domain/management/events/team-member-accepted-invitation.event'
+import { TeamsRepository } from '@/domain/management/repositories/teams.repository'
 import { TeamMembersRepository } from '@/domain/management/repositories/team-members.repository'
-import { SendNotificationUseCase } from '../use-cases/send-notification.use-case'
+import { TeamMemberAcceptedInvitationEvent } from '@/domain/management/events/team-member-accepted-invitation.event'
+
+import { SendManyNotificationsUseCase } from '../use-cases/send-many-notifications.use-case'
 
 export class OnTeamMemberAcceptsInvitation implements EventHandler {
    constructor(
+      private teamsRepository: TeamsRepository,
       private teamMembersRepository: TeamMembersRepository,
-      private sendNotification: SendNotificationUseCase,
+      private sendManyNotifications: SendManyNotificationsUseCase,
    ) {
       this.setupSubscriptions()
    }
 
    setupSubscriptions(): void {
-      throw new Error('Method not implemented.')
+      DomainEvents.register(
+         this.sendNotificationToTeamMembers.bind(this),
+         TeamMemberAcceptedInvitationEvent.name,
+      )
    }
 
    private async sendNotificationToTeamMembers({
       teamMember,
    }: TeamMemberAcceptedInvitationEvent) {
-      const userIds =
-         await this.teamMembersRepository.findManyUserIdsByTeamIdAndActive(
+      const [userIds, team, memberWithName] = await Promise.all([
+         this.teamMembersRepository.findManyUserIdsByTeamIdAndActive(
             teamMember.teamId.toString(),
-         )
+         ),
+         this.teamsRepository.findById(teamMember.teamId.toString()),
+         this.teamMembersRepository.findWithNameById(teamMember.id.toString()),
+      ])
 
-      for (const userId of userIds) {
+      if (!team || !memberWithName) {
+         return
       }
+
+      const currentMemberIndex = userIds.findIndex(
+         (id) => id === teamMember.userId.toString(),
+      )
+      userIds.splice(currentMemberIndex, 1)
+
+      await this.sendManyNotifications.execute({
+         userIds: userIds,
+         title: `An new member has joined ${team.name} team`,
+         content: `${
+            memberWithName.name
+         } just accepted the invitation to join his team as ${memberWithName.role.toLowerCase()}`,
+      })
    }
 }

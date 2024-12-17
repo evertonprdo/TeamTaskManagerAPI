@@ -6,25 +6,25 @@ import { Notification } from '../entities/notification'
 
 import { NotificationsRepository } from '../repositories/notifications.repository'
 
-interface SendManyNotificationsRequest {
+export interface SendManyNotificationsUseCaseRequest {
    userIds: string[]
    title: string
    content: string
 }
 
-type SendManyNotificationsResponse = Either<
+export type SendManyNotificationsUseCaseResponse = Either<
    null,
    { message: Message; notifications: Notification[] }
 >
 
-export class SendManyNotifications {
+export class SendManyNotificationsUseCase {
    constructor(private notificationsRepository: NotificationsRepository) {}
 
    async execute({
       userIds,
       content,
       title,
-   }: SendManyNotificationsRequest): Promise<SendManyNotificationsResponse> {
+   }: SendManyNotificationsUseCaseRequest): Promise<SendManyNotificationsUseCaseResponse> {
       const message = Message.create({
          title,
          content,
