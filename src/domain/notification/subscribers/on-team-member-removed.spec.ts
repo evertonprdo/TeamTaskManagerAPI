@@ -1,9 +1,9 @@
 import { waitFor } from '@/core/_tests/utils/wait-for'
 
-import { Member } from '@management/entities/member'
 import { makeTeam } from '@management/_tests/factories/make-team'
 import { makeUser } from '@management/_tests/factories/make-user'
 import { makeOwner } from '@management/_tests/factories/make-owner'
+import { makeMember } from '@management/_tests/factories/make-member'
 
 import { InMemoryDatabase } from '@management/_tests/repositories/in-memory-database'
 import { InMemoryUsersRepository } from '@management/_tests/repositories/in-memory-users.repository'
@@ -18,7 +18,7 @@ import {
    SendNotificationUseCaseResponse,
 } from '../use-cases/send-notification.use-case'
 
-import { OnTeamMemberCreated } from './on-team-member-created.event'
+import { OnTeamMemberRemoved } from './on-team-member-removed'
 
 let inMemoryDatabase: InMemoryDatabase
 
@@ -34,7 +34,7 @@ let sendNotificationExecuteSpy: jest.SpyInstance<
    [SendNotificationUseCaseRequest]
 >
 
-describe('Subscriber: On Team Member Created', () => {
+describe('Subscriber: On Team Member Removed', () => {
    beforeEach(() => {
       inMemoryDatabase = new InMemoryDatabase()
 
@@ -56,34 +56,34 @@ describe('Subscriber: On Team Member Created', () => {
          'execute',
       )
 
-      new OnTeamMemberCreated(
-         sendNotificationUseCase,
+      new OnTeamMemberRemoved(
          usersRepository,
          teamsRepository,
+         sendNotificationUseCase,
       )
    })
 
-   it('should send a invitation notification on team member created', async () => {
+   it('should send a notification to removed member', async () => {
       const team = makeTeam()
       const user = makeUser()
-      const owner = makeOwner({ teamId: team.id })
+      const owner = makeOwner({ teamId: team.id, userId: user.id })
+      const member = makeMember({ teamId: team.id })
 
       inMemoryDatabase.teams.push(team)
       inMemoryDatabase.users.push(user)
-      inMemoryDatabase.team_members.push(owner)
+      inMemoryDatabase.team_members.push(owner, member)
 
-      const member = Member.create(
-         {
-            teamId: owner.teamId,
-            userId: user.id,
-         },
-         owner,
-      )
-
-      teamMembersRepository.create(member)
+      member.remove(owner)
+      teamMembersRepository.save(member)
 
       await waitFor(() => {
          expect(sendNotificationExecuteSpy).toHaveBeenCalled()
       })
+
+      expect(sendNotificationExecuteSpy).toHaveBeenCalledWith(
+         expect.objectContaining({
+            recipientId: member.userId.toString(),
+         }),
+      )
    })
 })

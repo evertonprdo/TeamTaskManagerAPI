@@ -1,6 +1,6 @@
-import { makeMessage } from '../tests/factories/make-message'
-import { makeNotification } from '../tests/factories/make-notification'
-import { InMemoryNotificationsRepository } from '../tests/repositories/in-memory-notifications.repository'
+import { makeMessage } from '../_tests/factories/make-message'
+import { makeNotification } from '../_tests/factories/make-notification'
+import { InMemoryNotificationsRepository } from '../_tests/repositories/in-memory-notifications.repository'
 
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { FetchNotificationsUseCase } from './fetch-notifications.use-case'

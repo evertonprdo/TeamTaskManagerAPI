@@ -1,10 +1,10 @@
-import { makeMember } from '../tests/factories/make-member'
-import { makeTask } from '../tests/factories/make-task'
-import { makeUser } from '../tests/factories/make-user'
+import { makeMember } from '../_tests/factories/make-member'
+import { makeTask } from '../_tests/factories/make-task'
+import { makeUser } from '../_tests/factories/make-user'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTasksRepository } from '../_tests/repositories/in-memory-tasks.repository'
+import { InMemoryUsersRepository } from '../_tests/repositories/in-memory-users.repository'
 
 import { GetTeamMemberDetailsUseCase } from './get-team-member-details.use-case'
 

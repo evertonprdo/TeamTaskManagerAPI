@@ -1,11 +1,11 @@
-import { waitFor } from '@/core/tests/utils/wait-for'
+import { waitFor } from '@/core/_tests/utils/wait-for'
 
-import { makeOwner } from '../tests/factories/make-owner'
-import { makeTask } from '../tests/factories/make-task'
+import { makeOwner } from '../_tests/factories/make-owner'
+import { makeTask } from '../_tests/factories/make-task'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
-import { InMemoryTaskLogsRepository } from '../tests/repositories/in-memory-task-logs.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTasksRepository } from '../_tests/repositories/in-memory-tasks.repository'
+import { InMemoryTaskLogsRepository } from '../_tests/repositories/in-memory-task-logs.repository'
 
 import {
    CreateTaskLogUseCase,

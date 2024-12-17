@@ -1,10 +1,9 @@
-import { makeTask } from '../tests/factories/make-task'
-import { makeMember } from '../tests/factories/make-member'
+import { makeTask } from '../_tests/factories/make-task'
+import { makeMember } from '../_tests/factories/make-member'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTasksRepository } from '../_tests/repositories/in-memory-tasks.repository'
 
-import { NotAllowedError } from '@/core/errors/not-allowed.error'
 import { TaskAlreadyCompletedError } from './errors/task-already-completed.error'
 
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'

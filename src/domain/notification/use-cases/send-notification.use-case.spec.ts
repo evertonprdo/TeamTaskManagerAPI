@@ -1,4 +1,4 @@
-import { InMemoryNotificationsRepository } from '../tests/repositories/in-memory-notifications.repository'
+import { InMemoryNotificationsRepository } from '../_tests/repositories/in-memory-notifications.repository'
 
 import { SendNotificationUseCase } from './send-notification.use-case'
 

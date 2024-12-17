@@ -1,7 +1,7 @@
-import { makeTeam } from '../../tests/factories/make-team'
+import { makeTeam } from '../../_tests/factories/make-team'
 
-import { InMemoryDatabase } from '../../tests/repositories/in-memory-database'
-import { InMemoryTeamsRepository } from '../../tests/repositories/in-memory-teams.repository'
+import { InMemoryDatabase } from '../../_tests/repositories/in-memory-database'
+import { InMemoryTeamsRepository } from '../../_tests/repositories/in-memory-teams.repository'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 

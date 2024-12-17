@@ -1,16 +1,16 @@
-import { makeUser } from '../tests/factories/make-user'
-import { makeTask } from '../tests/factories/make-task'
-import { makeMember } from '../tests/factories/make-member'
+import { makeUser } from '../_tests/factories/make-user'
+import { makeTask } from '../_tests/factories/make-task'
+import { makeMember } from '../_tests/factories/make-member'
+import { makeTaskLog } from '../_tests/factories/make-task-log'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTaskLogsRepository } from '../tests/repositories/in-memory-task-logs.repository'
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTaskLogsRepository } from '../_tests/repositories/in-memory-task-logs.repository'
+import { InMemoryTeamMembersRepository } from '../_tests/repositories/in-memory-team-members.repository'
 
 import { TaskDetails } from '../entities/value-objects/task-details'
 import { TeamMemberWithName } from '../entities/value-objects/team-member-with-name'
 
 import { GetTaskDetailsUseCase } from './get-task-details.use-case'
-import { makeTaskLog } from '../tests/factories/make-task-log'
 
 let inMemoryDatabase: InMemoryDatabase
 let taskLogsRepository: InMemoryTaskLogsRepository

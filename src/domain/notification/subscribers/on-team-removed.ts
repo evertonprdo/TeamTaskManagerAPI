@@ -19,7 +19,7 @@ export class OnTeamRemoved implements EventHandler {
 
    private sendNotificationToMembers({ team, userIds }: TeamRemovedEvent) {
       this.sendManyNotifications.execute({
-         userIds,
+         recipientIds: userIds,
          title: `Unfortunately the team ${team.name} has been deleted`,
          content:
             'All tasks and team members have been removed along with the team.',

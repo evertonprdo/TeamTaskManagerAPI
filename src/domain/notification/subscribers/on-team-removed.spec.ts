@@ -1,14 +1,14 @@
-import { waitFor } from '@/core/tests/utils/wait-for'
+import { waitFor } from '@/core/_tests/utils/wait-for'
 
-import { makeTeam } from '@management/tests/factories/make-team'
-import { makeUser } from '@management/tests/factories/make-user'
-import { makeAdmin } from '@management/tests/factories/make-admin'
+import { makeTeam } from '@management/_tests/factories/make-team'
+import { makeUser } from '@management/_tests/factories/make-user'
+import { makeAdmin } from '@management/_tests/factories/make-admin'
 
-import { InMemoryDatabase } from '@management/tests/repositories/in-memory-database'
-import { InMemoryTeamsRepository } from '@management/tests/repositories/in-memory-teams.repository'
-import { InMemoryTeamMembersRepository } from '@management/tests/repositories/in-memory-team-members.repository'
+import { InMemoryDatabase } from '@management/_tests/repositories/in-memory-database'
+import { InMemoryTeamsRepository } from '@management/_tests/repositories/in-memory-teams.repository'
+import { InMemoryTeamMembersRepository } from '@management/_tests/repositories/in-memory-team-members.repository'
 
-import { InMemoryNotificationsRepository } from '../tests/repositories/in-memory-notifications.repository'
+import { InMemoryNotificationsRepository } from '../_tests/repositories/in-memory-notifications.repository'
 import {
    SendManyNotificationsUseCase,
    SendManyNotificationsUseCaseRequest,
@@ -70,11 +70,11 @@ describe('Subscriber: On team removed', () => {
       )
 
       const [[callArgs]] = sendManyNotificationsSpyExecute.mock.calls
-      expect(callArgs.userIds).toHaveLength(7)
+      expect(callArgs.recipientIds).toHaveLength(7)
 
       expect(sendManyNotificationsSpyExecute).toHaveBeenCalledWith(
          expect.objectContaining({
-            userIds: expect.arrayContaining(
+            recipientIds: expect.arrayContaining(
                users.map((user) => user.id.toString()),
             ),
          }),

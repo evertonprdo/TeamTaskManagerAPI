@@ -1,9 +1,9 @@
-import { makeAdmin } from '../tests/factories/make-admin'
-import { makeMember } from '../tests/factories/make-member'
-import { makeOwner } from '../tests/factories/make-owner'
+import { makeAdmin } from '../_tests/factories/make-admin'
+import { makeMember } from '../_tests/factories/make-member'
+import { makeOwner } from '../_tests/factories/make-owner'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTeamMembersRepository } from '../_tests/repositories/in-memory-team-members.repository'
 
 import { ForbiddenError } from '@/core/errors/forbidden.error'
 import { NotAllowedError } from '@/core/errors/not-allowed.error'

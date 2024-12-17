@@ -1,8 +1,8 @@
-import { makeTask } from '../tests/factories/make-task'
-import { makeOwner } from '../tests/factories/make-owner'
+import { makeTask } from '../_tests/factories/make-task'
+import { makeOwner } from '../_tests/factories/make-owner'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTaskLogsRepository } from '../tests/repositories/in-memory-task-logs.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTaskLogsRepository } from '../_tests/repositories/in-memory-task-logs.repository'
 
 import { CreateTaskLogUseCase } from './create-task-log.use-case'
 

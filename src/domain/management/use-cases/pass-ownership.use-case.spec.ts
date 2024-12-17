@@ -1,8 +1,8 @@
-import { makeOwner } from '../tests/factories/make-owner'
-import { makeMember } from '../tests/factories/make-member'
+import { makeOwner } from '../_tests/factories/make-owner'
+import { makeMember } from '../_tests/factories/make-member'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTeamMembersRepository } from '../_tests/repositories/in-memory-team-members.repository'
 
 import { Admin } from '../entities/admin'
 import { Owner } from '../entities/owner'

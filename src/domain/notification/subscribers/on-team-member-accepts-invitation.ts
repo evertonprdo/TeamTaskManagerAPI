@@ -38,13 +38,12 @@ export class OnTeamMemberAcceptsInvitation implements EventHandler {
          return
       }
 
-      const currentMemberIndex = userIds.findIndex(
-         (id) => id === teamMember.userId.toString(),
+      const teamMemberUserIdsWithoutNewMember = userIds.filter(
+         (id) => id !== teamMember.userId.toString(),
       )
-      userIds.splice(currentMemberIndex, 1)
 
       await this.sendManyNotifications.execute({
-         userIds: userIds,
+         recipientIds: teamMemberUserIdsWithoutNewMember,
          title: `An new member has joined ${team.name} team`,
          content: `${
             memberWithName.name

@@ -1,7 +1,7 @@
-import { makeMember } from '../../tests/factories/make-member'
+import { makeMember } from '../../_tests/factories/make-member'
 
-import { InMemoryDatabase } from '../../tests/repositories/in-memory-database'
-import { InMemoryTeamMembersRepository } from '../../tests/repositories/in-memory-team-members.repository'
+import { InMemoryDatabase } from '../../_tests/repositories/in-memory-database'
+import { InMemoryTeamMembersRepository } from '../../_tests/repositories/in-memory-team-members.repository'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 

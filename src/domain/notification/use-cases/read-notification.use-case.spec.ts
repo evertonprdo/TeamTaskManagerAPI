@@ -1,6 +1,6 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
-import { makeNotification } from '../tests/factories/make-notification'
-import { InMemoryNotificationsRepository } from '../tests/repositories/in-memory-notifications.repository'
+import { makeNotification } from '../_tests/factories/make-notification'
+import { InMemoryNotificationsRepository } from '../_tests/repositories/in-memory-notifications.repository'
 
 import { ReadNotificationUseCase } from './read-notification.use-case'
 import { NotAllowedError } from '@/core/errors/not-allowed.error'

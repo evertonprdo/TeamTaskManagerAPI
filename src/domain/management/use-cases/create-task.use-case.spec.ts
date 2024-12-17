@@ -1,7 +1,7 @@
-import { makeAdmin } from '../tests/factories/make-admin'
+import { makeAdmin } from '../_tests/factories/make-admin'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTasksRepository } from '../_tests/repositories/in-memory-tasks.repository'
 
 import { CreateTaskUseCase } from './create-task.use-case'
 

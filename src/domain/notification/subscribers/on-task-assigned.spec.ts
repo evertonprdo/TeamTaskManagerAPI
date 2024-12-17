@@ -1,13 +1,13 @@
-import { waitFor } from '@/core/tests/utils/wait-for'
+import { waitFor } from '@/core/_tests/utils/wait-for'
 
-import { makeTeam } from '@management/tests/factories/make-team'
-import { makeOwner } from '@management/tests/factories/make-owner'
+import { makeTeam } from '@management/_tests/factories/make-team'
+import { makeOwner } from '@management/_tests/factories/make-owner'
 
-import { InMemoryDatabase } from '@management/tests/repositories/in-memory-database'
-import { InMemoryTeamsRepository } from '@management/tests/repositories/in-memory-teams.repository'
-import { InMemoryTeamMembersRepository } from '@management/tests/repositories/in-memory-team-members.repository'
+import { InMemoryDatabase } from '@management/_tests/repositories/in-memory-database'
+import { InMemoryTeamsRepository } from '@management/_tests/repositories/in-memory-teams.repository'
+import { InMemoryTeamMembersRepository } from '@management/_tests/repositories/in-memory-team-members.repository'
 
-import { InMemoryNotificationsRepository } from '../tests/repositories/in-memory-notifications.repository'
+import { InMemoryNotificationsRepository } from '../_tests/repositories/in-memory-notifications.repository'
 
 import {
    SendNotificationUseCase,
@@ -15,10 +15,10 @@ import {
    SendNotificationUseCaseResponse,
 } from '../use-cases/send-notification.use-case'
 
-import { OnTaskEventTriggered } from './on-task-event-trigged'
+import { OnTaskAssigned } from './on-task-assigned'
 
-import { makeTask } from '@/domain/management/tests/factories/make-task'
-import { InMemoryTasksRepository } from '@/domain/management/tests/repositories/in-memory-tasks.repository'
+import { makeTask } from '@/domain/management/_tests/factories/make-task'
+import { InMemoryTasksRepository } from '@/domain/management/_tests/repositories/in-memory-tasks.repository'
 
 let inMemoryDatabase: InMemoryDatabase
 
@@ -34,7 +34,7 @@ let sendNotificationExecuteSpy: jest.SpyInstance<
    [SendNotificationUseCaseRequest]
 >
 
-describe('Subscriber: On Task Event Trigged', () => {
+describe('Subscriber: On Task Assigned', () => {
    beforeEach(() => {
       inMemoryDatabase = new InMemoryDatabase()
 
@@ -56,7 +56,7 @@ describe('Subscriber: On Task Event Trigged', () => {
          'execute',
       )
 
-      new OnTaskEventTriggered(
+      new OnTaskAssigned(
          teamsRepository,
          teamMembersRepository,
          sendNotificationUseCase,
@@ -80,6 +80,4 @@ describe('Subscriber: On Task Event Trigged', () => {
          expect(sendNotificationExecuteSpy).toHaveBeenCalled()
       })
    })
-
-   // it should be decomposed into unique events
 })

@@ -1,7 +1,7 @@
-import { makeTask } from '../../tests/factories/make-task'
+import { makeTask } from '../../_tests/factories/make-task'
 
-import { InMemoryDatabase } from '../../tests/repositories/in-memory-database'
-import { InMemoryTasksRepository } from '../../tests/repositories/in-memory-tasks.repository'
+import { InMemoryDatabase } from '../../_tests/repositories/in-memory-database'
+import { InMemoryTasksRepository } from '../../_tests/repositories/in-memory-tasks.repository'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 

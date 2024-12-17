@@ -1,12 +1,12 @@
-import { makeTask } from '../tests/factories/make-task'
-import { makeTeam } from '../tests/factories/make-team'
-import { makeUser } from '../tests/factories/make-user'
-import { makeOwner } from '../tests/factories/make-owner'
-import { makeAdmin } from '../tests/factories/make-admin'
-import { makeMember } from '../tests/factories/make-member'
+import { makeTask } from '../_tests/factories/make-task'
+import { makeTeam } from '../_tests/factories/make-team'
+import { makeUser } from '../_tests/factories/make-user'
+import { makeOwner } from '../_tests/factories/make-owner'
+import { makeAdmin } from '../_tests/factories/make-admin'
+import { makeMember } from '../_tests/factories/make-member'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTasksRepository } from '../_tests/repositories/in-memory-tasks.repository'
 
 import { ListTasksWithAssignedToUseCase } from './list-tasks-with-assigned-to.use-case'
 

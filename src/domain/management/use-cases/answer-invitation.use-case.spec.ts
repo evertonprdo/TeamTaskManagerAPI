@@ -1,6 +1,6 @@
-import { makeMember } from '../tests/factories/make-member'
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
+import { makeMember } from '../_tests/factories/make-member'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTeamMembersRepository } from '../_tests/repositories/in-memory-team-members.repository'
 
 import { AnswerInvitationUseCase } from './answer-invitation.use-case'
 import { InvitationAlreadyAnsweredError } from './errors/invitation-already-answered.error'

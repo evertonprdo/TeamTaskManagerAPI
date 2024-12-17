@@ -1,6 +1,6 @@
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTeamsRepository } from '../tests/repositories/in-memory-teams.repository'
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTeamsRepository } from '../_tests/repositories/in-memory-teams.repository'
+import { InMemoryTeamMembersRepository } from '../_tests/repositories/in-memory-team-members.repository'
 
 import { Owner } from '../entities/owner'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'

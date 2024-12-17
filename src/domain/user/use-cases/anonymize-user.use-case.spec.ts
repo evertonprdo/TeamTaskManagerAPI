@@ -1,5 +1,5 @@
-import { makeUser } from '../tests/factories/make-user'
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
+import { makeUser } from '../_tests/factories/make-user'
+import { InMemoryUsersRepository } from '../_tests/repositories/in-memory-users.repository'
 
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found.error'
 

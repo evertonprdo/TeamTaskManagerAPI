@@ -1,11 +1,11 @@
-import { makeUser } from '../tests/factories/make-user'
-import { makeAdmin } from '../tests/factories/make-admin'
-import { makeOwner } from '../tests/factories/make-owner'
-import { makeMember } from '../tests/factories/make-member'
+import { makeUser } from '../_tests/factories/make-user'
+import { makeAdmin } from '../_tests/factories/make-admin'
+import { makeOwner } from '../_tests/factories/make-owner'
+import { makeMember } from '../_tests/factories/make-member'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
-import { InMemoryTeamMembersRepository } from '../tests/repositories/in-memory-team-members.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryUsersRepository } from '../_tests/repositories/in-memory-users.repository'
+import { InMemoryTeamMembersRepository } from '../_tests/repositories/in-memory-team-members.repository'
 
 import { NotAllowedError } from '@/core/errors/not-allowed.error'
 import { UserAlreadyInError } from './errors/user-already-in.error'

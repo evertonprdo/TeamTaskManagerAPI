@@ -1,10 +1,10 @@
 import { AggregateRoot } from '@/core/entities/aggregate-root'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
-import { TaskReassignedEvent } from '../events/task-reassigned.event'
-import { TaskAction, TaskEvent } from '../events/task.event'
-import { TaskStatusUpdatedEvent } from '../events/task-status-updated.event'
 import { TaskCreatedEvent } from '../events/task-created.event'
+import { TaskReassignedEvent } from '../events/task-reassigned.event'
+import { TaskAssignedEvent } from '../events/task-assigned.event'
+import { TaskStatusUpdatedEvent } from '../events/task-status-updated.event'
 
 import { TeamMember } from './team-member'
 import { Admin } from './admin'
@@ -105,7 +105,7 @@ export class Task extends AggregateRoot<TaskProps> {
       this.props.assignedToId = teamMemberId
       this.touch()
 
-      this.addDomainEvent(new TaskEvent(this, TaskAction.ASSIGN))
+      this.addDomainEvent(new TaskAssignedEvent(this))
    }
 
    reassign(teamMemberId: UniqueEntityID) {

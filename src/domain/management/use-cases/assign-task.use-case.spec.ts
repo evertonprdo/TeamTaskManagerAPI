@@ -1,8 +1,8 @@
-import { makeTask } from '../tests/factories/make-task'
-import { makeMember } from '../tests/factories/make-member'
+import { makeTask } from '../_tests/factories/make-task'
+import { makeMember } from '../_tests/factories/make-member'
 
-import { InMemoryDatabase } from '../tests/repositories/in-memory-database'
-import { InMemoryTasksRepository } from '../tests/repositories/in-memory-tasks.repository'
+import { InMemoryDatabase } from '../_tests/repositories/in-memory-database'
+import { InMemoryTasksRepository } from '../_tests/repositories/in-memory-tasks.repository'
 
 import { AssignTaskUseCase } from './assign-task.use-case'
 import { ForbiddenError } from '@/core/errors/forbidden.error'

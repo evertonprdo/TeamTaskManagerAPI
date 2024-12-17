@@ -1,4 +1,4 @@
-import { InMemoryNotificationsRepository } from '../tests/repositories/in-memory-notifications.repository'
+import { InMemoryNotificationsRepository } from '../_tests/repositories/in-memory-notifications.repository'
 
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { SendManyNotificationsUseCase } from './send-many-notifications.use-case'
@@ -20,7 +20,7 @@ describe('Use case: Send Team MembersNotification', () => {
       )
 
       const result = await sut.execute({
-         userIds: userIds,
+         recipientIds: userIds,
          title: 'title',
          content: 'content',
       })

@@ -1,8 +1,8 @@
-import { makeUser } from '../tests/factories/make-user'
+import { makeUser } from '../_tests/factories/make-user'
 
-import { FakeHasher } from '../tests/cryptography/fake-hasher'
-import { FakeEncrypter } from '../tests/cryptography/fake-encrypter'
-import { InMemoryUsersRepository } from '../tests/repositories/in-memory-users.repository'
+import { FakeHasher } from '../_tests/cryptography/fake-hasher'
+import { FakeEncrypter } from '../_tests/cryptography/fake-encrypter'
+import { InMemoryUsersRepository } from '../_tests/repositories/in-memory-users.repository'
 
 import { WrongCredentialsError } from './errors/wrong-credentials.error'
 
